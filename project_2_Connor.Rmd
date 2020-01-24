@@ -21,11 +21,15 @@ knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
 
 ```{r}
 library("AER")
-?STAR
+library("foreign")
 ```
 
 
 ```{r}
+setwd("C:\\Users\\rosen_000\\Dropbox\\Daivs\\2-Winter Q 2020\\STA 207 Research Methods II\\Project-2")
+star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
+
+
 data("STAR")
 
 
