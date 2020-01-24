@@ -26,16 +26,43 @@ library("foreign")
 
 
 ```{r}
-setwd("C:\\Users\\rosen_000\\Dropbox\\Daivs\\2-Winter Q 2020\\STA 207 Research Methods II\\Project-2")
+setwd("/Users/rongkui/Desktop/Classes/STA207/PROJECT+STAR/")
 star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
-
-
-data("STAR")
-
-
-
 ```
 
+```{r}
+library()
+data = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize", "g1mathss", "g1tgen","g1trace","g1thighdegree","g1tcareer","g1tyears","g1motivraw","g1selfconraw", "g2tchid","g2classtype","g2schid","g2surban", "g2classsize", "g2absent","g2mathss", "g2tgen","g2trace","g2thighdegree","g2tcareer","g2tyears","g2motivraw","g2selfconraw")
+data = star[,data]
+data = data[complete.cases(data),]
+data
+```
+
+```{r}
+dim(data)
+```
+
+```{r}
+data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1mathss", "g1tgen","g1trace","g1thighdegree","g1tcareer","g1tyears","g1motivraw","g1selfconraw")
+data1 = star[,data1]
+data1 = data1[complete.cases(data1),]
+dim(data1)
+head(data1)
+```
+
+```{r}
+data2 = names(star) %in% c("g2tchid","g2classtype","g2schid","g2surban", "g2classsize", "g2absent","g2mathss", "g2tgen","g2trace","g2thighdegree","g2tcareer","g2tyears","g2motivraw","g2selfconraw")
+data2 = star[,data2]
+data2 = data2[complete.cases(data2),]
+dim(data2)
+head(data2)
+```
+
+
+
+```{r}
+
+```
 
 
 ```{r, include=FALSE}
