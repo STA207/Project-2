@@ -53,10 +53,17 @@ Name (responsibilities):
 
 ### Sensitivity Analysis
 
+
+
 # Results
 
 ## Descriptive Analysis
 
+```{r}
+library(AER)
+data(STAR)
+STAR
+```
 
 ## Inferential Analysis
 
