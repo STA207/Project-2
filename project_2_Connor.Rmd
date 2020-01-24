@@ -1,0 +1,66 @@
+---
+title: "Effects of Class Size on Math Performance in Tennessee"
+output:
+  pdf_document:
+    df_print: paged
+    fig_caption: yes
+    number_sections: yes
+---
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 18px;
+  }
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
+```
+
+Team ID:
+
+Name (responsibilities):
+
+Name (responsibilities):
+
+Name (responsibilities):
+
+Name (responsibilities):
+
+
+# Introduction
+
+
+## Background
+
+
+## Statistical questions of interest
+
+
+# Analysis Plan
+
+
+## Population and study design
+
+
+## Statistical Analysis
+
+### Descriptive Analysis
+
+### Main Analysis
+
+### Sensitivity Analysis
+
+# Results
+
+## Descriptive Analysis
+
+
+## Inferential Analysis
+
+## Sensitivity analysis
+
+
+# Discussion
