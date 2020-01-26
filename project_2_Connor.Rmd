@@ -22,45 +22,84 @@ knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
 ```{r}
 library("AER")
 library("foreign")
+library("sqldf")
+library("plotly")
 ```
 
 
 ```{r}
-setwd("/Users/rongkui/Desktop/Classes/STA207/PROJECT+STAR/")
+setwd("C:\\Users\\rosen_000\\Dropbox\\Daivs\\2-Winter Q 2020\\STA 207 Research Methods II\\Project-2")
 star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 ```
 
-```{r}
-library()
-data = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize", "g1mathss", "g1tgen","g1trace","g1thighdegree","g1tcareer","g1tyears","g1motivraw","g1selfconraw", "g2tchid","g2classtype","g2schid","g2surban", "g2classsize", "g2absent","g2mathss", "g2tgen","g2trace","g2thighdegree","g2tcareer","g2tyears","g2motivraw","g2selfconraw")
-data = star[,data]
-data = data[complete.cases(data),]
-data
-```
 
 ```{r}
-dim(data)
-```
-
-```{r}
-data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1mathss", "g1tgen","g1trace","g1thighdegree","g1tcareer","g1tyears","g1motivraw","g1selfconraw")
+data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1tmathss", "g1tgen")
 data1 = star[,data1]
 data1 = data1[complete.cases(data1),]
-dim(data1)
-head(data1)
-```
-
-```{r}
-data2 = names(star) %in% c("g2tchid","g2classtype","g2schid","g2surban", "g2classsize", "g2absent","g2mathss", "g2tgen","g2trace","g2thighdegree","g2tcareer","g2tyears","g2motivraw","g2selfconraw")
-data2 = star[,data2]
-data2 = data2[complete.cases(data2),]
-dim(data2)
-head(data2)
 ```
 
 
+```{r}
+#Group by teachers as unit
+data1_teach = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID, g1schid as g1_schoolID, g1classtype as g1_classtype, g1surban as g1_surburban, COUNT(g1tchid) as g1_classsize , AVG(g1tmathss) as g1_Avg_Math_score
+                    FROM data1
+                    GROUP BY g1tchid")
+
+write.csv(data1_teach, "Teach_as_Unit.csv")
+```
+
+
 
 ```{r}
+#Plot of boxplot of average class math scores broken by class type
+box1 = plot_ly(data1_teach, y = ~g1_Avg_Math_score, color = ~g1_classtype, type = "box") %>%
+  layout(yaxis = list(title = "Average First Grade Classroom Sclaed Math Score"),
+         xaxis = list(title = "Class Type")) %>%
+
+box1
+```
+
+
+```{r}
+a = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+          WHERE g1_classtype == 'SMALL CLASS'")
+
+b = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+          WHERE g1_classtype  == 'REGULAR + AIDE CLASS'")
+
+c = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+          WHERE g1_classtype == 'REGULAR CLASS'")
+
+hist_small <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~a$g1_Avg_Math_score, marker = list(color = "#C6CFE5")) %>%
+  layout(barmode = "overlay",
+         title = "Class Average Scaled Math Score",
+         xaxis = list(title = "SMALL CLASSES"))
+
+hist_reg <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~b$g1_Avg_Math_score, marker = list(color = "#FDC6B0")) %>%
+  layout(barmode = "overlay",
+         title = "Class Average Scaled Math Score",
+         xaxis = list(title = "REGULAR CLASSES"))
+
+hist_regaide <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~c$g1_Avg_Math_score, marker = list(color = "#B2E0D2")) %>%
+  layout(barmode = "overlay",
+         title = "Class Average Scaled Math Score",
+         xaxis = list(title = "REGULAR + AIDE CLASSES"))
+
+hist_regaide
+```
+
+
+```{r}
+#ANOVA
+
+teach_anova = aov(g1_Avg_Math_score ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID , 
+                  data = data1_teach)
+
+summary(teach_anova)
 
 ```
 
@@ -104,8 +143,20 @@ The STAR experiment was designed by a group of researchers including Helen Pate-
 7. *Student achievement was to be tracked by standarized tests, which were carefully monitored.*   
 
 
-## Statistical questions of interest
+## Questions of Interest
+To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the average scaled math score of all students under each teacher.  The modified variable of interest will, in theory, stabilize the variability in our data and provide us with better conditions to make a causal statement as to the effect of class size on a teacher's performance. 
 
+Our questions of interest are as follows:
+
+1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?
+
+2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
+
+3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
+
+4. Can we conclude that class sizes affect the class average math scores of first-grade teachers?
+
+Answering these questions will provide more detail into our analysis of the effect of class size on classroom performance.
 
 # Analysis Plan
 
