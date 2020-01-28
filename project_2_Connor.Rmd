@@ -24,6 +24,8 @@ library("AER")
 library("foreign")
 library("sqldf")
 library("plotly")
+library("kableExtra")
+
 ```
 
 
@@ -42,65 +44,149 @@ data1 = data1[complete.cases(data1),]
 
 ```{r}
 #Group by teachers as unit
-data1_teach = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID, g1schid as g1_schoolID, g1classtype as g1_classtype, g1surban as g1_surburban, COUNT(g1tchid) as g1_classsize , AVG(g1tmathss) as g1_Avg_Math_score
+t_data1 = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID,
+                            g1schid as g1_schoolID,
+                            g1classtype as g1_classtype,
+                            g1surban as g1_surburban,
+                            COUNT(g1tchid) as g1_classsize,
+                            AVG(g1tmathss) as g1_avgmath,
+                            MIN(g1tmathss) as g1_minmath,
+                            MAX(g1tmathss) as g1_maxmath
                     FROM data1
                     GROUP BY g1tchid")
 
-write.csv(data1_teach, "Teach_as_Unit.csv")
+
+t_data1$g1_teachID = as.factor(t_data1$g1_teachID)
+t_data1$g1_schoolID = as.factor(t_data1$g1_schoolID)
+t_data1$g1_classtype= as.factor(t_data1$g1_classtype)
+t_data1$g1_surburban = as.factor(t_data1$g1_surburban)
+
+
+
+write.csv(t_data1, "Teach_as_Unit.csv")
 ```
 
 
 
 ```{r}
-#Plot of boxplot of average class math scores broken by class type
-box1 = plot_ly(data1_teach, y = ~g1_Avg_Math_score, color = ~g1_classtype, type = "box") %>%
-  layout(yaxis = list(title = "Average First Grade Classroom Sclaed Math Score"),
-         xaxis = list(title = "Class Type")) %>%
+#Boxplot of average class math scores broken by class type
+box1 = plot_ly(t_data1, y = ~g1_avgmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Average Classroom Score",
+         yaxis = list(title = "Classroom Average Sclaed Math Score"),
+         xaxis = list(title = "Class Type"))
 
+#Boxplot of min class math scores broken by class type
+box2 = plot_ly(t_data1, y = ~g1_minmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Minimum Classroom Score",
+         yaxis = list(title = "Classroom Minimum Sclaed Math Score"),
+         xaxis = list(title = "Class Type")) 
+
+#Boxplot of min class math scores broken by class type
+box3 = plot_ly(t_data1, y = ~g1_maxmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Classroom Maximum Score",
+         yaxis = list(title = "Sclaed Math Score"),
+         xaxis = list(title = "Class Type"))
+  
 box1
+box2
+box3
 ```
 
 
 ```{r}
-a = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+#Histograms for Average Scores
+a = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype == 'SMALL CLASS'")
 
-b = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+b = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype  == 'REGULAR + AIDE CLASS'")
 
-c = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+c = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype == 'REGULAR CLASS'")
 
-hist_small <- plot_ly(alpha = 0.2) %>%
-  add_histogram(x = ~a$g1_Avg_Math_score, marker = list(color = "#C6CFE5")) %>%
+hist_avgsmall <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~a$g1_avgmath, marker = list(color = "#C6CFE5")) %>%
   layout(barmode = "overlay",
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "SMALL CLASSES"))
 
-hist_reg <- plot_ly(alpha = 0.2) %>%
-  add_histogram(x = ~b$g1_Avg_Math_score, marker = list(color = "#FDC6B0")) %>%
+hist_avgreg <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~b$g1_avgmath, marker = list(color = "#FDC6B0")) %>%
   layout(barmode = "overlay",
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "REGULAR CLASSES"))
 
-hist_regaide <- plot_ly(alpha = 0.2) %>%
-  add_histogram(x = ~c$g1_Avg_Math_score, marker = list(color = "#B2E0D2")) %>%
+hist_avgregaide <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~c$g1_avgmath, marker = list(color = "#B2E0D2")) %>%
   layout(barmode = "overlay",
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "REGULAR + AIDE CLASSES"))
 
-hist_regaide
+hist_avgsmall
+hist_avgreg
+hist_avgregaide
 ```
+
+```{r}
+#Histograms for Average Scores
+a = sqldf("SELECT g1_minmath FROM t_data1
+          WHERE g1_classtype == 'SMALL CLASS'")
+
+b = sqldf("SELECT g1_minmath FROM t_data1
+          WHERE g1_classtype  == 'REGULAR + AIDE CLASS'")
+
+c = sqldf("SELECT g1_minmath FROM t_data1
+          WHERE g1_classtype == 'REGULAR CLASS'")
+
+hist_minsmall <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~a$g1_minmath, marker = list(color = "#C6CFE5")) %>%
+  layout(barmode = "overlay",
+         title = "Class Minimum Scaled Math Score",
+         xaxis = list(title = "SMALL CLASSES"))
+
+hist_minreg <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~b$g1_minmath, marker = list(color = "#FDC6B0")) %>%
+  layout(barmode = "overlay",
+         title = "Class Minimum Scaled Math Score",
+         xaxis = list(title = "REGULAR CLASSES"))
+
+hist_minregaide <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~c$g1_minmath, marker = list(color = "#B2E0D2")) %>%
+  layout(barmode = "overlay",
+         title = "Class Minimum Scaled Math Score",
+         xaxis = list(title = "REGULAR + AIDE CLASSES"))
+
+hist_minsmall
+hist_minreg
+hist_minregaide
+```
+
+
+
+```{r}
+Lv_test_avg = leveneTest(g1_avgmath~g1_classtype, data = t_data1) #Equal Variacnes
+kable(Lv_test_avg, caption = "Levene's Test for Equal Variance: Classroom Average Score") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+
+Lv_test_min = leveneTest(g1_avgmath~g1_classtype, data = t_data1) #Equal Variacnes
+kable(Lv_test_min, caption = "Levene's Test for Equal Variance: Classroom Minimum Score") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
 
 
 ```{r}
 #ANOVA
 
-teach_anova = aov(g1_Avg_Math_score ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID , 
-                  data = data1_teach)
+avg_anova = aov(g1_avgmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
 
-summary(teach_anova)
+summary(avg_anova)
+plot(avg_anova) #normality is an issue
 
+
+min_anova = aov(g1_minmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
+summary(min_anova)
+plot(min_anova) #normality is NOT an issue
 ```
 
 
@@ -110,13 +196,12 @@ summary(teach_anova)
 
 ***
 
-Team ID:
+Team ID: 6
 
-Name:
-Name:
-Name:
-Name:
-
+Name: Rongkui Han
+Name: Connor Rosenberg
+Name: Yuqing Yang
+Name: Nassim Ali-Cahouche
 
 
 # Introduction
@@ -144,19 +229,19 @@ The STAR experiment was designed by a group of researchers including Helen Pate-
 
 
 ## Questions of Interest
-To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the average scaled math score of all students under each teacher.  The modified variable of interest will, in theory, stabilize the variability in our data and provide us with better conditions to make a causal statement as to the effect of class size on a teacher's performance. 
+
+To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the classroom average and classroom minimum scaled math scores of each first-grade teacher .  The modified variable of interest will, in theory, stabilize the variability in our data and provide us with better conditions to make inferences regarding the effect of classroom size on a teacher's performance. 
 
 Our questions of interest are as follows:
 
-1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?
+1. Is there a significant difference in a first-grade teacher's average and minimum math scores across the three different class sizes?
 
 2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
 
-3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
+3. Does our ANOVA model fit well with the data? In other words, are the assumptions for anova satisfied? 
 
-4. Can we conclude that class sizes affect the class average math scores of first-grade teachers?
+4. Can we conclude that class sizes affect the performacne of first-grade teachers?
 
-Answering these questions will provide more detail into our analysis of the effect of class size on classroom performance.
 
 # Analysis Plan
 
