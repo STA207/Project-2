@@ -57,7 +57,7 @@ data1_teach
 #Plot of boxplot of average class math scores broken by class type
 box1 = plot_ly(data1_teach, y = ~g1_Avg_Math_score, color = ~g1_classtype, type = "box") %>%
   layout(yaxis = list(title = "Average First Grade Classroom Sclaed Math Score"),
-         xaxis = list(title = "Class Type")) %>%
+         xaxis = list(title = "Class Type"))
 
 box1
 ```
@@ -205,4 +205,14 @@ To expand on our previous findings, we will set teachers as the experimental uni
 > Task 7: Discuss whether you are able to make any causal statements based on your analysis.
 
 > Task 8: Is there any difference between the results from Project 2 compared to the results from Project 1?
+
+# Conclusions
+
+1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?
+
+2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
+
+3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
+
+4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?
 
