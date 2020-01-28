@@ -28,7 +28,7 @@ library("plotly")
 
 
 ```{r}
-setwd("C:\\Users\\rosen_000\\Dropbox\\Daivs\\2-Winter Q 2020\\STA 207 Research Methods II\\Project-2")
+setwd("/Users/rongkui/Desktop/Classes/STA207/Project_2/")
 star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 ```
 
@@ -37,6 +37,7 @@ star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1tmathss", "g1tgen")
 data1 = star[,data1]
 data1 = data1[complete.cases(data1),]
+
 ```
 
 
@@ -47,6 +48,7 @@ data1_teach = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID, g1schid as g1_schoo
                     GROUP BY g1tchid")
 
 write.csv(data1_teach, "Teach_as_Unit.csv")
+data1_teach
 ```
 
 
@@ -55,7 +57,7 @@ write.csv(data1_teach, "Teach_as_Unit.csv")
 #Plot of boxplot of average class math scores broken by class type
 box1 = plot_ly(data1_teach, y = ~g1_Avg_Math_score, color = ~g1_classtype, type = "box") %>%
   layout(yaxis = list(title = "Average First Grade Classroom Sclaed Math Score"),
-         xaxis = list(title = "Class Type")) %>%
+         xaxis = list(title = "Class Type"))
 
 box1
 ```
@@ -104,6 +106,11 @@ summary(teach_anova)
 ```
 
 
+```{r}
+data1_teach
+```
+
+
 ```{r, include=FALSE}
 #Write Report
 ```
@@ -144,7 +151,6 @@ The STAR experiment was designed by a group of researchers including Helen Pate-
 
 
 ## Questions of Interest
-To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the average scaled math score of all students under each teacher.  The modified variable of interest will, in theory, stabilize the variability in our data and provide us with better conditions to make a causal statement as to the effect of class size on a teacher's performance. 
 
 Our questions of interest are as follows:
 
@@ -154,7 +160,7 @@ Our questions of interest are as follows:
 
 3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
 
-4. Can we conclude that class sizes affect the class average math scores of first-grade teachers?
+4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?
 
 Answering these questions will provide more detail into our analysis of the effect of class size on classroom performance.
 
@@ -163,12 +169,20 @@ Answering these questions will provide more detail into our analysis of the effe
 
 ## Population and study design
 
+To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the average scaled math score of all students under each teacher.  The modified variable of interest will, in theory, stabilize the variability in our data and provide us with better conditions to make a causal statement as to the effect of class size on a teacher's performance. 
 
 ## Statistical Analysis
 
 ### Descriptive Analysis
 
+> Task 1: Explore math scaled scores in the 1st with teachers as the unit. Generate summary statistics (in forms of tables or plots) that you find informative, and explain them.    
+
+
 ### Main Analysis
+
+> Task 2: Write down a two-way ANOVA model to study the effects of class types on math scaled scores in 1st grade, with the school indicator as the other factor. Explain your notation.
+
+> Task 3: Explain why your model is appropriate for this task on this data set. You may want to include statistics and plots in your explanation.    
 
 ### Sensitivity Analysis
 
@@ -176,10 +190,29 @@ Answering these questions will provide more detail into our analysis of the effe
 
 ## Descriptive Analysis
 
+## Main Analysis
 
-## Inferential Analysis
+> Task 4: Fit the model you choose in Task 2 and show your fits in the report.    
+
+> Task 5: Conduct model diagnostic and/or sensitivity analysis.
+
+> Task 6: Test whether there is a difference in math scaled score in 1st grade across teachers in different class types. Justify your choice of test.
 
 ## Sensitivity analysis
 
-
 # Discussion
+
+> Task 7: Discuss whether you are able to make any causal statements based on your analysis.
+
+> Task 8: Is there any difference between the results from Project 2 compared to the results from Project 1?
+
+# Conclusions
+
+1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?
+
+2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
+
+3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
+
+4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?
+
