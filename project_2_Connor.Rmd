@@ -321,6 +321,7 @@ med_anova_int = aov(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_sc
 med_anova1_int = anova(lm(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
                   data = t_data1))
 
+
 med_anova1_int = round(med_anova1_int, 2)
 med_anova1_int$`Pr(>F)` = c("<.001", "<.001",.39, "NA")
 
