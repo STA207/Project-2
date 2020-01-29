@@ -24,6 +24,7 @@ library("AER")
 library("foreign")
 library("sqldf")
 library("plotly")
+library("ggplot2")
 ```
 
 
@@ -37,7 +38,7 @@ star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1tmathss", "g1tgen")
 data1 = star[,data1]
 data1 = data1[complete.cases(data1),]
-
+dim(data1)
 ```
 
 
@@ -60,6 +61,13 @@ box1 = plot_ly(data1_teach, y = ~g1_Avg_Math_score, color = ~g1_classtype, type 
          xaxis = list(title = "Class Type"))
 
 box1
+```
+
+```{r}
+table1 = data1_teach
+
+ggplot(table1, aes(x = g1_classtype)) +
+  geom_col(aes(y = g1_surburban, fill = g1_surburban))
 ```
 
 
@@ -117,24 +125,23 @@ data1_teach
 
 ***
 
-Team ID:
+### Team ID: Team 6
 
-Name:
-Name:
-Name:
-Name:
+#### NAME: Connor Rosenberg
+#### NAME: Rongkui Han
+#### NAME: Yuqing Yang
+#### NAME: Nassim Ali-Chaouche
 
-
+***
 
 # Introduction
 
 
 ## Background
 
-The Student/Teacher Achievement Ratio (STAR) was a four-year longitudinal class-size study funded by the Tennessee General Assembly and conducted by the State Department of Education. Over 7,000 students from kindergarten to 3rd grade in 79 schools were randomly assigned into one of three interventions: small class (13 to 17 students per teacher), regular class (22 to 25 students per teacher), and regular-with-aide class (22 to 25 students with a full-time teacher's aide). Classroom teachers were also randomly assigned to the classes they would teach. The interventions were initiated as the students entered school in kindergarten and continued through third grade.    
+The Student/Teacher Achievement Ratio (STAR) was a four-year longitudinal class-size study funded by the Tennessee General Assembly and conducted by the State Department of Education. Over 7,000 students from kindergarten to 3rd grade in 79 schools were randomly assigned into one of three interventions: small class (13 to 17 students per teacher), regular class (22 to 25 students per teacher), and regular-with-aide class (22 to 25 students with a full-time teacher's aide). Classroom teachers were also randomly assigned to the classes they would teach. The interventions were initiated as the students entered school in kindergarten and continued through third grade.     
 
-The STAR experiment was designed by a group of researchers including Helen Pate-Bain, the driving force behind Project STAR, other academics, and members of the Tennessee Department of Education. Some of its key features are: 
-
+Some of the key features of project STAR are:    
 1. *All Tennessee schools with K-3 classes were invited to participate.* Giving every school a chance to join the study helped ensure a diverse sample as well as rule out the possibility that class-size effects could be attributed to selection bias.   
 
 2. *Each school included in the study had to have a large enough student body to form as least one of each of the three class types.* The within-school design provided built-in control for differences among schools in terms of resources, leadership, and facilities.   
@@ -152,30 +159,30 @@ The STAR experiment was designed by a group of researchers including Helen Pate-
 
 ## Questions of Interest
 
-Our questions of interest are as follows:
+Our questions of interest are as follows:     
 
-1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?
-
-2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
-
-3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
-
-4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?
-
+1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?    
+2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?    
+3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied?    
+4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?      
 Answering these questions will provide more detail into our analysis of the effect of class size on classroom performance.
 
 # Analysis Plan
 
-
 ## Population and study design
 
-To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the average scaled math score of all students under each teacher.  The modified variable of interest will, in theory, stabilize the variability in our data and provide us with better conditions to make a causal statement as to the effect of class size on a teacher's performance. 
+Project STAR is an example of stratified randomized design, where experimental units are grouped together according to certain
+pre-treatment characteristics into strata. Within each stratum, a completely randomized experiment is conducted. In this study, each school can be viewed as a stratum, within each of which there is at least one complete set of three classes with different class sizes. A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
+
+To expand on our previous findings, we will set teachers as the experimental unit, rather than the individual student. We will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. The aggregation of data justifies the no-interference assumption of stable unit treatment value assumption (SUTVA), thus providing us with sufficient conditions to make a causal statement as to the effect of class size on educational outcome.   
 
 ## Statistical Analysis
 
 ### Descriptive Analysis
 
 > Task 1: Explore math scaled scores in the 1st with teachers as the unit. Generate summary statistics (in forms of tables or plots) that you find informative, and explain them.    
+
+
 
 
 ### Main Analysis
@@ -202,17 +209,21 @@ To expand on our previous findings, we will set teachers as the experimental uni
 
 # Discussion
 
-> Task 7: Discuss whether you are able to make any causal statements based on your analysis.
+In this report, we presented our usage of 2-way ANOVA to analyze the effect of class size on first-grade teachers' teaching performance in math in a stratified randomized experiment, using each school as a stratum. We explored the effect of including stratum x class size interactions in our model, and concluded that interactions between the two factors did not contribute significantly to the variance partitioning of the data. Model diagnostics suggested that the dataset satisfied assumptions for ANOVA. Results derived from fitting of the model suggested significant difference in a first-grade teacher's median math scores across different class sizes. Pairwise comparisons suggested that **small classes and regular classes with aides both outperformed regular classes without aides**. The model also revealed significant performance differences across schools, with the largest pairwaise difference being **XXX** in class median 1st grade scale math score.      
 
-> Task 8: Is there any difference between the results from Project 2 compared to the results from Project 1?
+This analysis enabled us to make causal statements regarding the effect of class size on teacher's performance in math education. This is made possible by using teachers as experimental units, thuse satisfying the SUTVA and independence assumptions necessary for causal inferences:    
 
-# Conclusions
+**SUTVA**:
+Definition: *The potential outcomes for any unit do not vary with the treatments assigned to other units, and, for each unit, there are no different forms or versions of each treatment level, which lead to different potential outcomes.*     
+The experimental unit used in the analysis first satisfies the no-interference component of SUTVA – the assumption that the treatment
+applied to one unit does not affect the outcome for other units. On the basis of prior knowledge of school systems, it is realistic to assume that one teacher being assigned to a specific class size does not affect the teaching outcoome of another teacher. The second component of SUTVA requires that an individual receiving a specific treatment level cannot receive different forms of that treatment. In our case, the class size treatment is consistent across teachers. The regular-size class one teacher taught is by nature homogenous with the regular-size class anoother teacher taught, due to the strict randomization implemented in the experiment.       
 
-1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?
+**Independence Assumption**:    
+Definition: *the assignment of treatment is independent of potential outcomes of experimental units.*   
+This assumption is met in the experiment by using double randomization: One random assignment is that of teachers to classes
+of different types, small, regular, or regular with aide. The second randomization is of students to classes/teachers. The design ensured that high/low performance teacher or students were not systematically enriched in any class-size treatments. In light of this, systematic effects can be interpreted as the effects of class size. 
 
-2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
+Therefore, our analysis concludes that smaller class size has a positive average causal effect on a teacher's teaching outcome in math. 
+This is different from the conclusion of Project I. SUTVA was not plausible when using individual students as experimental units, as was done in Project I. Interactions between students likely resulted in altered potential outcome of one student due to the treatment assigned to another, thus violating SUTVA. In that case, even clear rejections of the null hypothesis would not necessarily be convincing evidence of effects of class size; it may simply indicate the presence of peer effects. In contrast, using teachers as experimental units does not rely on no-interference assumptions among students. This makes the results reported here credible evidence of causal class-size effects.
 
-3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied? 
-
-4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?
 
