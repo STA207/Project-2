@@ -93,11 +93,18 @@ box4 = plot_ly(t_data1, y = ~g1_medmath, color = ~g1_classtype, type = "box") %>
   layout(title = "Classroom Median Score",
          yaxis = list(title = "Sclaed Math Score"),
          xaxis = list(title = "Class Type"))
+
+#Boxplot of med class math scores broken by schoolID
+box5 = plot_ly(t_data1, y = ~g1_medmath, color = ~g1_schoolID, type = "box") %>%
+  layout(title = "Classroom Median Score",
+         yaxis = list(title = "Sclaed Math Score"),
+         xaxis = list(title = "SchoolID"))
   
 box1
 box2
 box3
 box4
+box5
 ```
 
 
@@ -200,12 +207,14 @@ plot(min_anova) #normality is NOT an issue
 med_anova = aov(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
                   data = t_data1)
 summary(med_anova)
-plot(med_anova) #normality is NOT an issue
+plot(med_anova)
+plot(avg_anova)#normality is NOT an issue
 ```
 
 
 ```{r, include=FALSE}
 #Write Report
+
 ```
 
 ***
@@ -244,17 +253,18 @@ The STAR experiment was designed by a group of researchers including Helen Pate-
 
 ## Questions of Interest
 
-To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the classroom median scaled math scores of each first-grade teacher.  The modified variable of interest will, in theory, stabilize the variability in our data and provide better conditions to make inferences about a teacher's performance. 
+To expand on our previous findings, we will set teachers as the experimental unit. Unlike our past research, which focused on the scores of an individual student, we will now consider the overall performance of each first-grade teacher. This modified variable of interest will, in theory, stabilize the variability in our data and provide better conditions to make inferences about improving teacher performance. 
 
 Our questions of interest are as follows:
 
-1. Is there a significant difference in a first-grade teacher's median math scores across the three different class sizes?
+1. Is there a significant difference in the performance of first-grade teachers across the three different class sizes?
 
 2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?
 
 3. Does our ANOVA model fit well with the data? In other words, are the assumptions for anova satisfied? 
 
-4. Can we conclude that class sizes affect the performacne of first-grade teachers?
+4. Can we conclude that class sizes affect the performance of first-grade teachers?
+
 
 
 ## Population and study design
@@ -270,9 +280,31 @@ To expand on our previous findings, we will set teachers as the experimental uni
 
 ### Main Analysis
 
-> Task 2: Write down a two-way ANOVA model to study the effects of class types on math scaled scores in 1st grade, with the school indicator as the other factor. Explain your notation.
+For our analysis, we will construct the following factor effects model for the classroom median math score.
 
-> Task 3: Explain why your model is appropriate for this task on this data set. You may want to include statistics and plots in your explanation.    
+$$y_{i,j,k} = μ_{..} + τ_i + β_j + (τβ)_{ij} + ε_{ ijk}$$
+for:
+$$i  \epsilon[1,2,3,4]$$
+$$j  \epsilon[1,2,...,76]$$
+Where:
+
+$$\sum_{i=1}^{4} τ_i = 0$$
+$$\sum_{i=1}^{76} β_j = 0$$
+and
+** $μ_{..}$ represents the overall classroom median score across all treatment levels.
+** $τ_i$ represents the effect of each class size on the overall median math score.
+** $β_j$ represents the effect of each school on the overall median math score.
+** $(τβ)_{ij}$ represents the interaction effect, if any, of each school & class size combination on the overall median math score.
+
+Our model is appropriate to answer the questions of interest because it captures the effect of each treatment on the class’ median performance while controlling for other external factors by blocking by school id.
+
+Figure #, which shows the boxplots of the classroom median scores for each school, highlights the variability in teacher performance across each distinct school. This variability is likely due to the different similar demographic features within schools, but various demographic features between them. For example, schools located in areas of high affluence may achieve better classroom performance since more students have access to academic support in addition to greater parent oversight. Similarly, school’s who pulls its population from less affluent areas may see worse classroom performance due to student food insecurity, lack of academic support, and other social deficiencies. 
+
+```{r, echo=FALSE}
+box5
+```
+
+Because of this high variability in median classroom performance between schools, blocking by school id in our model helps to extract the true effect of the class size treatment on the classroom median performance. 
 
 ### Sensitivity Analysis
 
@@ -282,7 +314,23 @@ To expand on our previous findings, we will set teachers as the experimental uni
 
 ## Main Analysis
 
-> Task 4: Fit the model you choose in Task 2 and show your fits in the report.    
+```{r, echo=FALSE}
+med_anova_int = aov(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
+
+med_anova1_int = anova(lm(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1))
+
+med_anova1_int = round(med_anova1_int, 2)
+med_anova1_int$`Pr(>F)` = c("<.001", "<.001",.39, "NA")
+
+
+kable(med_anova1_int, caption  = "ANOVA Table with Interaction") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+
+```
+
 
 > Task 5: Conduct model diagnostic and/or sensitivity analysis.
 
