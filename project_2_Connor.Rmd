@@ -35,14 +35,14 @@ star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 ```
 
 
-```{r}
+```{r, include = FALSE}
 data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1tmathss", "g1tgen")
 data1 = star[,data1]
 data1 = data1[complete.cases(data1),]
 ```
 
 
-```{r}
+```{r, include = FALSE}
 #Group by teachers as unit
 t_data1 = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID,
                             g1schid as g1_schoolID,
@@ -64,12 +64,12 @@ t_data1$g1_surburban = as.factor(t_data1$g1_surburban)
 
 
 
-write.csv(t_data1, "Teach_as_Unit.csv")
+#write.csv(t_data1, "Teach_as_Unit.csv")
 ```
 
 
 
-```{r}
+```{r, include = FALSE}
 #Boxplot of average class math scores broken by class type
 box1 = plot_ly(t_data1, y = ~g1_avgmath, color = ~g1_classtype, type = "box") %>%
   layout(title = "Average Classroom Score",
@@ -99,16 +99,10 @@ box5 = plot_ly(t_data1, y = ~g1_medmath, color = ~g1_schoolID, type = "box") %>%
   layout(title = "Classroom Median Score",
          yaxis = list(title = "Sclaed Math Score"),
          xaxis = list(title = "SchoolID"))
-  
-box1
-box2
-box3
-box4
-box5
 ```
 
 
-```{r}
+```{r, include = FALSE}
 #Histograms for Average Scores
 a = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype == 'SMALL CLASS'")
@@ -137,12 +131,9 @@ hist_avgregaide <- plot_ly(alpha = 0.2) %>%
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "REGULAR + AIDE CLASSES"))
 
-hist_avgsmall
-hist_avgreg
-hist_avgregaide
 ```
 
-```{r}
+```{r, include = FALSE}
 #Histograms for Average Scores
 a = sqldf("SELECT g1_minmath FROM t_data1
           WHERE g1_classtype == 'SMALL CLASS'")
@@ -171,14 +162,11 @@ hist_minregaide <- plot_ly(alpha = 0.2) %>%
          title = "Class Minimum Scaled Math Score",
          xaxis = list(title = "REGULAR + AIDE CLASSES"))
 
-hist_minsmall
-hist_minreg
-hist_minregaide
 ```
 
 
 
-```{r}
+```{r, include = FALSE}
 Lv_test_avg = leveneTest(g1_avgmath~g1_classtype, data = t_data1) #Equal Variacnes
 kable(Lv_test_avg, caption = "Levene's Test for Equal Variance: Classroom Average Score") %>% kable_styling(bootstrap_options = "striped", full_width = F)
 
@@ -188,7 +176,7 @@ kable(Lv_test_min, caption = "Levene's Test for Equal Variance: Classroom Minimu
 
 
 
-```{r}
+```{r, include = FALSE}
 #ANOVA
 
 avg_anova = aov(g1_avgmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
@@ -211,11 +199,6 @@ plot(med_anova)
 plot(avg_anova)#normality is NOT an issue
 ```
 
-
-```{r, include=FALSE}
-#Write Report
-
-```
 
 ***
 

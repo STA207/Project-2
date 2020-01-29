@@ -1,6 +1,8 @@
 ---
 title: "Effects of Class Size on Math Performance in Tennessee"
 output:
+  html_document:
+    df_print: paged
   pdf_document:
     df_print: paged
     fig_caption: yes
@@ -19,108 +21,184 @@ body{ /* Normal  */
 knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
 ```
 
-```{r}
+```{r, include=FALSE}
 library("AER")
 library("foreign")
 library("sqldf")
 library("plotly")
-library("ggplot2")
+library("kableExtra")
 ```
 
 
-```{r}
+```{r, include=FALSE}
 setwd("/Users/rongkui/Desktop/Classes/STA207/Project_2/")
 star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 ```
 
 
-```{r}
+```{r, include = FALSE}
 data1 = names(star) %in% c("g1tchid","g1classtype","g1schid","g1surban", "g1classsize","g1tmathss", "g1tgen")
 data1 = star[,data1]
 data1 = data1[complete.cases(data1),]
-dim(data1)
 ```
 
 
-```{r}
+
+
+
+```{r, include = FALSE}
 #Group by teachers as unit
-data1_teach = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID, g1schid as g1_schoolID, g1classtype as g1_classtype, g1surban as g1_surburban, COUNT(g1tchid) as g1_classsize , AVG(g1tmathss) as g1_Avg_Math_score
+t_data1 = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID,
+                            g1schid as g1_schoolID,
+                            g1classtype as g1_classtype,
+                            g1surban as g1_surburban,
+                            COUNT(g1tchid) as g1_classsize,
+                            AVG(g1tmathss) as g1_avgmath,
+                            MIN(g1tmathss) as g1_minmath,
+                            MAX(g1tmathss) as g1_maxmath,
+                            MEDIAN(g1tmathss) as g1_medmath
                     FROM data1
                     GROUP BY g1tchid")
 
-write.csv(data1_teach, "Teach_as_Unit.csv")
-data1_teach
+
+t_data1$g1_teachID = as.factor(t_data1$g1_teachID)
+t_data1$g1_schoolID = as.factor(t_data1$g1_schoolID)
+t_data1$g1_classtype= as.factor(t_data1$g1_classtype)
+t_data1$g1_surburban = as.factor(t_data1$g1_surburban)
+
+
+
+#write.csv(t_data1, "Teach_as_Unit.csv")
 ```
 
-
-
-```{r}
-#Plot of boxplot of average class math scores broken by class type
-box1 = plot_ly(data1_teach, y = ~g1_Avg_Math_score, color = ~g1_classtype, type = "box") %>%
-  layout(yaxis = list(title = "Average First Grade Classroom Sclaed Math Score"),
+```{r, include = FALSE}
+#Boxplot of average class math scores broken by class type
+box1 = plot_ly(t_data1, y = ~g1_avgmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Average Classroom Score",
+         yaxis = list(title = "Classroom Average Sclaed Math Score"),
          xaxis = list(title = "Class Type"))
 
-box1
+#Boxplot of min class math scores broken by class type
+box2 = plot_ly(t_data1, y = ~g1_minmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Minimum Classroom Score",
+         yaxis = list(title = "Classroom Minimum Sclaed Math Score"),
+         xaxis = list(title = "Class Type")) 
+
+#Boxplot of min class math scores broken by class type
+box3 = plot_ly(t_data1, y = ~g1_maxmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Classroom Maximum Score",
+         yaxis = list(title = "Sclaed Math Score"),
+         xaxis = list(title = "Class Type"))
+
+#Boxplot of med class math scores broken by class type
+box4 = plot_ly(t_data1, y = ~g1_medmath, color = ~g1_classtype, type = "box") %>%
+  layout(title = "Classroom Median Score",
+         yaxis = list(title = "Sclaed Math Score"),
+         xaxis = list(title = "Class Type"))
+
+#Boxplot of med class math scores broken by schoolID
+box5 = plot_ly(t_data1, y = ~g1_medmath, color = ~g1_schoolID, type = "box") %>%
+  layout(title = "Classroom Median Score",
+         yaxis = list(title = "Sclaed Math Score"),
+         xaxis = list(title = "SchoolID"))
 ```
 
-```{r}
-table1 = data1_teach
 
-ggplot(table1, aes(x = g1_classtype)) +
-  geom_col(aes(y = g1_surburban, fill = g1_surburban))
-```
-
-
-```{r}
-a = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+```{r, include = FALSE}
+#Histograms for Average Scores
+a = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype == 'SMALL CLASS'")
 
-b = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+b = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype  == 'REGULAR + AIDE CLASS'")
 
-c = sqldf("SELECT g1_Avg_Math_score FROM data1_teach
+c = sqldf("SELECT g1_avgmath FROM t_data1
           WHERE g1_classtype == 'REGULAR CLASS'")
 
-hist_small <- plot_ly(alpha = 0.2) %>%
-  add_histogram(x = ~a$g1_Avg_Math_score, marker = list(color = "#C6CFE5")) %>%
+hist_avgsmall <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~a$g1_avgmath, marker = list(color = "#C6CFE5")) %>%
   layout(barmode = "overlay",
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "SMALL CLASSES"))
 
-hist_reg <- plot_ly(alpha = 0.2) %>%
-  add_histogram(x = ~b$g1_Avg_Math_score, marker = list(color = "#FDC6B0")) %>%
+hist_avgreg <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~b$g1_avgmath, marker = list(color = "#FDC6B0")) %>%
   layout(barmode = "overlay",
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "REGULAR CLASSES"))
 
-hist_regaide <- plot_ly(alpha = 0.2) %>%
-  add_histogram(x = ~c$g1_Avg_Math_score, marker = list(color = "#B2E0D2")) %>%
+hist_avgregaide <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~c$g1_avgmath, marker = list(color = "#B2E0D2")) %>%
   layout(barmode = "overlay",
          title = "Class Average Scaled Math Score",
          xaxis = list(title = "REGULAR + AIDE CLASSES"))
 
-hist_regaide
+```
+
+```{r, include = FALSE}
+#Histograms for Average Scores
+a = sqldf("SELECT g1_minmath FROM t_data1
+          WHERE g1_classtype == 'SMALL CLASS'")
+
+b = sqldf("SELECT g1_minmath FROM t_data1
+          WHERE g1_classtype  == 'REGULAR + AIDE CLASS'")
+
+c = sqldf("SELECT g1_minmath FROM t_data1
+          WHERE g1_classtype == 'REGULAR CLASS'")
+
+hist_minsmall <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~a$g1_minmath, marker = list(color = "#C6CFE5")) %>%
+  layout(barmode = "overlay",
+         title = "Class Minimum Scaled Math Score",
+         xaxis = list(title = "SMALL CLASSES"))
+
+hist_minreg <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~b$g1_minmath, marker = list(color = "#FDC6B0")) %>%
+  layout(barmode = "overlay",
+         title = "Class Minimum Scaled Math Score",
+         xaxis = list(title = "REGULAR CLASSES"))
+
+hist_minregaide <- plot_ly(alpha = 0.2) %>%
+  add_histogram(x = ~c$g1_minmath, marker = list(color = "#B2E0D2")) %>%
+  layout(barmode = "overlay",
+         title = "Class Minimum Scaled Math Score",
+         xaxis = list(title = "REGULAR + AIDE CLASSES"))
+
 ```
 
 
-```{r}
+
+```{r, include = FALSE}
+Lv_test_avg = leveneTest(g1_avgmath~g1_classtype, data = t_data1) #Equal Variacnes
+kable(Lv_test_avg, caption = "Levene's Test for Equal Variance: Classroom Average Score") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+
+Lv_test_min = leveneTest(g1_avgmath~g1_classtype, data = t_data1) #Equal Variacnes
+kable(Lv_test_min, caption = "Levene's Test for Equal Variance: Classroom Minimum Score") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+
+
+```{r, include = FALSE}
 #ANOVA
 
-teach_anova = aov(g1_Avg_Math_score ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID , 
-                  data = data1_teach)
+avg_anova = aov(g1_avgmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
 
-summary(teach_anova)
-
-```
-
-
-```{r}
-data1_teach
-```
+summary(avg_anova)
+plot(avg_anova) #normality is an issue
 
 
-```{r, include=FALSE}
-#Write Report
+min_anova = aov(g1_minmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
+summary(min_anova)
+plot(min_anova) #normality is NOT an issue
+
+
+med_anova = aov(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
+summary(med_anova)
+plot(med_anova)
+plot(avg_anova)#normality is NOT an issue
 ```
 
 ***
@@ -165,16 +243,14 @@ Our questions of interest are as follows:
 2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?    
 3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied?    
 4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?      
-Answering these questions will provide more detail into our analysis of the effect of class size on classroom performance.
 
 # Analysis Plan
 
 ## Population and study design
 
-Project STAR is an example of stratified randomized design, where experimental units are grouped together according to certain
-pre-treatment characteristics into strata. Within each stratum, a completely randomized experiment is conducted. In this study, each school can be viewed as a stratum, within each of which there is at least one complete set of three classes with different class sizes. A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
+Project STAR is an example of stratified randomized design, where experimental units are grouped together according to certain pre-treatment characteristics into strata. Within each stratum, a completely randomized experiment is conducted. In this study, each school can be viewed as a stratum. A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
 
-To expand on our previous findings, we will set teachers as the experimental unit, rather than the individual student. We will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. The aggregation of data justifies the no-interference assumption of stable unit treatment value assumption (SUTVA), thus providing us with sufficient conditions to make a causal statement as to the effect of class size on educational outcome.   
+To expand on our previous findings, we will set teachers as the experimental unit, rather than the individual student. We will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. The adjustment of experimental unit will enable us to make a causal statement as to the effect of class size on educational outcome.   
 
 ## Statistical Analysis
 
@@ -182,14 +258,33 @@ To expand on our previous findings, we will set teachers as the experimental uni
 
 > Task 1: Explore math scaled scores in the 1st with teachers as the unit. Generate summary statistics (in forms of tables or plots) that you find informative, and explain them.    
 
-
-
-
 ### Main Analysis
 
-> Task 2: Write down a two-way ANOVA model to study the effects of class types on math scaled scores in 1st grade, with the school indicator as the other factor. Explain your notation.
+For our analysis, we will construct the following factor effects model for the classroom median math score.
 
-> Task 3: Explain why your model is appropriate for this task on this data set. You may want to include statistics and plots in your explanation.    
+$$y_{ijk} = μ_{..} + τ_i + β_j + (τβ)_{ij} + ε_{ ijk}$$
+for:
+$$i  \epsilon[1,2,3,4]$$
+$$j  \epsilon[1,2,...,76]$$
+Where:
+
+$$\sum_{i=1}^{4} τ_i = 0$$
+$$\sum_{i=1}^{76} β_j = 0$$
+and 
+- $μ_{..}$ represents the overall classroom median score across all treatment levels.   
+- $τ_i$ represents the effect of each class size on the overall median math score.   
+- $β_j$ represents the effect of each school on the overall median math score.    
+- $(τβ)_{ij}$ represents the interaction effect, if any, of each school & class size combination on the overall median math score.    
+
+Our model is appropriate to answer the questions of interest because it captures the effect of each treatment on the class’ median performance while controlling for other external factors by blocking by school id.
+
+Figure #, which shows the boxplots of the classroom median scores for each school, highlights the variability in teacher performance across each distinct school. This variability is likely due to the similar demographic features within schools, but various demographic features between them. For example, schools located in areas of high affluence may achieve better classroom performance since more students have access to academic support in addition to greater parent oversight. Similarly, schools who pull their students from less affluent areas may see worse classroom performance due to student food insecurity, lack of academic support, and other social deficiencies. 
+
+```{r, echo=FALSE}
+box5
+```
+
+Because of this high variability in median classroom performance between schools, blocking by school id in our model helps to extract the true effect of the class size treatment on the classroom median performance. 
 
 ### Sensitivity Analysis
 
@@ -199,7 +294,20 @@ To expand on our previous findings, we will set teachers as the experimental uni
 
 ## Main Analysis
 
-> Task 4: Fit the model you choose in Task 2 and show your fits in the report.    
+```{r, echo=FALSE}
+med_anova_int = aov(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1)
+
+med_anova1_int = anova(lm(g1_medmath ~ g1_classtype + g1_schoolID + g1_classtype:g1_schoolID, 
+                  data = t_data1))
+
+
+med_anova1_int = round(med_anova1_int, 2)
+med_anova1_int$`Pr(>F)` = c("<.001", "<.001",.39, "NA")
+
+
+kable(med_anova1_int, caption  = "ANOVA Table with Interaction") %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
 
 > Task 5: Conduct model diagnostic and/or sensitivity analysis.
 
@@ -209,21 +317,20 @@ To expand on our previous findings, we will set teachers as the experimental uni
 
 # Discussion
 
-In this report, we presented our usage of 2-way ANOVA to analyze the effect of class size on first-grade teachers' teaching performance in math in a stratified randomized experiment, using each school as a stratum. We explored the effect of including stratum x class size interactions in our model, and concluded that interactions between the two factors did not contribute significantly to the variance partitioning of the data. Model diagnostics suggested that the dataset satisfied assumptions for ANOVA. Results derived from fitting of the model suggested significant difference in a first-grade teacher's median math scores across different class sizes. Pairwise comparisons suggested that **small classes and regular classes with aides both outperformed regular classes without aides**. The model also revealed significant performance differences across schools, with the largest pairwaise difference being **XXX** in class median 1st grade scale math score.      
+In this report, we presented our usage of 2-way ANOVA to analyze the effect of class size on first-grade teachers' teaching performance in math in a stratified randomized experiment, using each school as a stratum. We explored the effect of including schoo-by-class size interactions in our model, and concluded that interactions between the two factors did not contribute significantly to the variance partitioning of the data. Model diagnostics suggested that the dataset satisfied assumptions for ANOVA. Results derived from the fitting of the model suggested significant difference in a first-grade teacher's median math scores across different class sizes. Pairwise comparisons suggested that **small classes and regular classes with aides both outperformed regular classes without aides**. The model also revealed significant performance differences across schools, with the largest pairwaise difference being **XXX** in class median 1st grade scale math score.      
 
-This analysis enabled us to make causal statements regarding the effect of class size on teacher's performance in math education. This is made possible by using teachers as experimental units, thuse satisfying the SUTVA and independence assumptions necessary for causal inferences:    
+This analysis enables us to make causal statements regarding the effect of class size on teacher's performance in math education. This is made possible by using teachers as experimental units, thus satisfying the SUTVA and independence assumptions necessary for causal inferences:    
 
 **SUTVA**:
 Definition: *The potential outcomes for any unit do not vary with the treatments assigned to other units, and, for each unit, there are no different forms or versions of each treatment level, which lead to different potential outcomes.*     
 The experimental unit used in the analysis first satisfies the no-interference component of SUTVA – the assumption that the treatment
-applied to one unit does not affect the outcome for other units. On the basis of prior knowledge of school systems, it is realistic to assume that one teacher being assigned to a specific class size does not affect the teaching outcoome of another teacher. The second component of SUTVA requires that an individual receiving a specific treatment level cannot receive different forms of that treatment. In our case, the class size treatment is consistent across teachers. The regular-size class one teacher taught is by nature homogenous with the regular-size class anoother teacher taught, due to the strict randomization implemented in the experiment.       
+applied to one unit does not affect the outcome for other units. On the basis of prior knowledge of school systems, it is realistic to assume that one teacher being assigned to a specific class size does not affect the teaching outcoome of another teacher. The second component of SUTVA requires that individuals receiving a specific treatment cannot receive different forms of that treatment. In our case, due to the strict randomization implemented in the experiment, the class taught by one teacher is by nature homogenous with a class taught by another.       
 
 **Independence Assumption**:    
 Definition: *the assignment of treatment is independent of potential outcomes of experimental units.*   
-This assumption is met in the experiment by using double randomization: One random assignment is that of teachers to classes
-of different types, small, regular, or regular with aide. The second randomization is of students to classes/teachers. The design ensured that high/low performance teacher or students were not systematically enriched in any class-size treatments. In light of this, systematic effects can be interpreted as the effects of class size. 
+This assumption is met in the experiment by using double randomization: One random assignment is that of teachers to classes. The second randomization is of students to classes/teachers. The design ensures that high/low performance teacher or students were not systematically enriched in any class-size treatments. In light of this, systematic effects can be interpreted as the effects of class size. 
 
 Therefore, our analysis concludes that smaller class size has a positive average causal effect on a teacher's teaching outcome in math. 
-This is different from the conclusion of Project I. SUTVA was not plausible when using individual students as experimental units, as was done in Project I. Interactions between students likely resulted in altered potential outcome of one student due to the treatment assigned to another, thus violating SUTVA. In that case, even clear rejections of the null hypothesis would not necessarily be convincing evidence of effects of class size; it may simply indicate the presence of peer effects. In contrast, using teachers as experimental units does not rely on no-interference assumptions among students. This makes the results reported here credible evidence of causal class-size effects.
+This is different from the conclusion of Project I. SUTVA was not plausible when using individual students as experimental units. Interactions between students likely resulted in altered potential outcome of one student due to the treatment assigned to another, thus violating SUTVA. In that case, rejections of the null hypothesis would not necessarily be convincing evidence of effects of class size; it may simply indicate the presence of peer effects. In contrast, using teachers as experimental units does not rely on no-interference assumptions among students. This makes the results reported here credible evidence of causal class-size effects.
 
 
