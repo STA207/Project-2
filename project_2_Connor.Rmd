@@ -29,6 +29,8 @@ library("plotly")
 library("kableExtra")
 library("MASS")
 library("ggplot2")
+library("dplyr")
+library("tidyverse")
 ```
 
 
@@ -103,6 +105,9 @@ box5 = plot_ly(t_data1, y = ~g1_medmath, color = ~g1_schoolID, type = "box") %>%
   layout(title = "Classroom Median Score",
          yaxis = list(title = "Sclaed Math Score"),
          xaxis = list(title = "SchoolID"))
+
+
+
 ```
 
 
@@ -192,10 +197,6 @@ Our questions of interest are as follows:
 
 ### 2.1 Population and study design
 
-Project STAR is an example of stratified randomized design, where experimental units are grouped together according to certain pre-treatment characteristics. Within each stratum, a randomized experiment is conducted. In this study, each school can be viewed as a stratum and each of the three different types of class sizes are the experiment. A two-way ANOVA test is fitting to answer our questions of interest under this study design. One factor in the ANOVA model will be class size treatment, whose main effect on teacher performance is of primary interest to us. The other factor will be school ID, in order to control for and observe the stratum effect. 
-
-To expand on our previous findings, we will set teachers as the experimental unit, rather than the individual student. We will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class more faithfully reflects the class' performance under each teacher. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. The adjustment of experimental unit will enable us to make a causal statement as to the effect of class size on educational outcome.
-
 A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
 
 In oreder to treat teachers as the experimental units, we will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. 
@@ -266,6 +267,9 @@ med_anova = aov(g1_medmath ~ g1_classtype + g1_schoolID,
 med_anova1 = anova(lm(g1_medmath ~ g1_classtype + g1_schoolID,
                           data = t_data1))
 
+reg1 = lm(g1_medmath ~ g1_classtype + g1_schoolID,
+                          data = t_data1)
+
 
 med_anova1 = round(med_anova1, 2)
 med_anova1$`Pr(>F)` = c("<.001", "<.001", "NA")
@@ -286,10 +290,11 @@ From the Q-Q plot of the residuals (Figure ..) , we can observe that most of tha
 
 ```{r, echo = FALSE, fig.align="center"}
 plot(med_anova, which = c(2))
-hist(reg1$residuals, main = "Histogram of Residuals", xlab = "Residual Values")
-
 ```
 
+```{r}
+hist(reg1$residuals, main = "Histogram of Residuals", xlab = "Residual Values")
+```
 
 
 To visualize the distribution of the residuals, a histogram will be used:
