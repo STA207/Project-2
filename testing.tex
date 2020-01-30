@@ -1,0 +1,305 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{}
+    \pretitle{\vspace{\droptitle}}
+  \posttitle{}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+
+\hypertarget{hypothesis-testing}{%
+\section{Hypothesis Testing}\label{hypothesis-testing}}
+
+Since we have unequal sample sizes, the factor effect component sum of squares are no longer orthogonal. Therefore, we would use the general linear F-test instead for the testing parts. The basic idea is to compare SSE under the full model with SSE under the reduced model, and we want to test whether specific components could be drop out of the full model. The details are shown as below:
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\item
+  Here the F-test statistic is: \(F^* = \frac{\frac{SSE(R)-SSE(F)}{df_R-df_F}}{\frac{SSE(F)}{df_F}}\), where SSE(R) is SSE under the reduced model, \(df_R\) is the degree of freedom for the reduced model, SSE(F) is SSE under the full model, and \(df_F\) is the degree of freedom for the full model.
+\item
+  \(F^*\) follows the F distribution, \(F_{(df_R-df_F),df_F}\), under the null hypothesis (\(H_0\)).
+\item
+  We would reject \(H_0\) at level \(\alpha\) if \(F^* > F(1-\alpha;(df_R-df_F),df_F)\), or if the p-value \(< \alpha\).
+\end{enumerate}
+
+\hypertarget{test-for-interaction-effects}{%
+\subsection{Test for Interaction Effects}\label{test-for-interaction-effects}}
+
+First, we want to test whether or not interaction effects are present. This would assess whether the effect of the factor class size differs across the stratum.
+
+\(H_0: all \ (\tau\beta)_{ij} = 0\)
+
+\(H_a\): not all \((\tau\beta)_{ij}'s\) equal zero
+
+Here the full model is: \(Y_{ijk} = \mu_{..} + \tau_i + \beta_j + (\tau\beta)_{ij} + \epsilon_{ijk}\).
+
+And the reduced model is: \(Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}\).
+
+If we reject \(H_0\) at level \(\alpha\), we conclude that there are interaction effects.
+
+\hypertarget{test-for-factor-main-effects}{%
+\subsection{Test for Factor Main Effects}\label{test-for-factor-main-effects}}
+
+\hypertarget{class-size}{%
+\subsubsection{Class Size}\label{class-size}}
+
+Then, we want to test whether or not class size effects are present:
+
+\(H_0\): \(\tau_1 = \tau_2 = \tau_3 = 0\)
+
+\(H_a\): not all \(\tau_i's\) equal zero.
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\tightlist
+\item
+  If there are interaction effects, then
+\end{enumerate}
+
+\begin{itemize}
+\item
+  The full model is: \(Y_{ijk} = \mu_{..} + \tau_i + \beta_j + (\tau\beta)_{ij} +\epsilon_{ijk}\).
+\item
+  And the reduced model is: \(Y_{ijk} = \mu_{..} + \beta_j + (\tau\beta)_{ij} +\epsilon_{ijk}\).
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  If there are no interaction effects, then
+\end{enumerate}
+
+\begin{itemize}
+\item
+  The full model is: \(Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}\).
+\item
+  And the reduced model is: \(Y_{ijk} = \mu_{..} + \beta_j + \epsilon_{ijk}\).
+\end{itemize}
+
+If we reject \(H_0\) at level \(\alpha\), we conclude that the effects of class size are present.
+
+\hypertarget{school}{%
+\subsubsection{School}\label{school}}
+
+Although the class size effects are of our primary interests, we also want to test whether or not school effects are present:
+
+\(H_0\): \(\beta_1 = \beta_2 =...= \beta_{76} = 0\)
+
+\(H_a\): not all \(\beta_i's\) equal zero.
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\tightlist
+\item
+  If there are interaction effects, then
+\end{enumerate}
+
+\begin{itemize}
+\item
+  The full model is: \(Y_{ijk} = \mu_{..} + \tau_i + \beta_j + (\tau\beta)_{ij} +\epsilon_{ijk}\).
+\item
+  And the reduced model is: \(Y_{ijk} = \mu_{..} + \tau_i + (\tau\beta)_{ij} +\epsilon_{ijk}\).
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  If there are no interaction effects, then
+\end{enumerate}
+
+\begin{itemize}
+\item
+  The full model is: \(Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}\).
+\item
+  And the reduced model is: \(Y_{ijk} = \mu_{..} + \tau_i + \epsilon_{ijk}\).
+\end{itemize}
+
+If we reject \(H_0\) at level \(\alpha\), we conclude the effects of school are present.
+
+\hypertarget{analysis-of-class-size-effects}{%
+\subsection{Analysis of Class Size Effects}\label{analysis-of-class-size-effects}}
+
+Because we are interested in the difference in the class size effects, we would do pairwise comparisons among the three class sizes. The Tukey's procedure will be used, and this procedure is conservative result when sample sizes are unequal.
+
+First, we define the differnce between two factor level means \(D_{ii'} = \mu_{i.} - \mu_{i'.}\). The point estimate for \(D_{ii'}\) is \(\hat D_{ii'} = \bar{Y_{i..}}-\bar{Y_{i'..}}\). Since \(\bar {Y_{i..}}\) and \(\bar {Y_{i'..}}\) are independent, the variance of \(\hat D_{ii'}\) is \(\sigma^2\{\hat D_{ii'}\}=\frac{\sigma^2}{b^2}\sum_j(\frac{1}{n_{ij}}+\frac{1}{n_{i'j}})\). And the estimated variance of \(\hat D_{ii'}\) is \(s^2\{\hat D_{ii'}\}=\frac{MSE}{b^2}\sum_j(\frac{1}{n_{ij}}+\frac{1}{n_{i'j}})\).
+
+Then, we do simultaneous testing:
+
+\(H_0: D_{ii'} =0\)
+
+\(H_a: D_{ii'} \neq 0\)
+
+If we control the family-wise confidence coefficient at level 1-\(\alpha\), the confidence interval for \(D_{ii'}\) is of the form:
+
+\(\hat D_{ii'} \pm T \times s(\hat D_{ii'}),\)
+where \(T=\frac{1}{\sqrt{2}}q(1-\alpha;a,n_T-ab)\)
+
+We would check whether or not zero is contained in each interval. If zero is contained, we conclude \(H_0\); otherwise, we conclude \(H_a\).
+
+\hypertarget{testing-result}{%
+\section{Testing Result}\label{testing-result}}
+
+We use significance level 0.05 for all the following tests.
+
+\hypertarget{test-for-interaction-effects-1}{%
+\subsection{Test for Interaction Effects}\label{test-for-interaction-effects-1}}
+
+The results of F-test for interaction effects is shown in Table \ref{tab:inter}.
+
+\begin{longtable}[]{@{}lllll@{}}
+\caption{\label{tab:inter} Test for Interaction Effects}\tabularnewline
+\toprule
+Model & Degree of Fredom & SSE & \(F^*\) & P-value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Model & Degree of Fredom & SSE & \(F^*\) & P-value\tabularnewline
+\midrule
+\endhead
+Full & 114 & 34612 & &\tabularnewline
+Reduced & 260 & 81345 & 1.0543 & 0.3855\tabularnewline
+\bottomrule
+\end{longtable}
+
+Since p-value = 0.3855, we can not reject \(H_0: all \ (\tau\beta)_{ij} = 0\) at level of significance level 0.05. We conclude that there is no interaction between these two factors.
+
+As a result, we would revised the full model by excluding the interaction effects for the following tests. Also, we use this new full model for the main analysis.
+
+\hypertarget{class-size-1}{%
+\subsubsection{Class Size}\label{class-size-1}}
+
+The results of F-test for class type main effects is shown in the Table \ref{tab:class}.
+
+\begin{longtable}[]{@{}lllll@{}}
+\caption{\label{tab:class}Test for Factor Main Effects}\tabularnewline
+\toprule
+Model & Degree of Fredom & SSE & \(F^*\) & P-value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Model & Degree of Fredom & SSE & \(F^*\) & P-value\tabularnewline
+\midrule
+\endhead
+Full & 334 & 221371 & &\tabularnewline
+Reduced & 336 & 232391 & 8.3137 & 0.0002995\tabularnewline
+\bottomrule
+\end{longtable}
+
+Since p-value = 0.0002995, we reject \(H_0\): \(\tau_1 = \tau_2 = \tau_3 = 0\) at level of significance level 0.05. We conclude that there are class type main effects.
+
+\hypertarget{school-1}{%
+\subsubsection{School}\label{school-1}}
+
+The results of F-test for school effects are shown in Table \ref{tab:school}.
+
+\begin{longtable}[]{@{}lllll@{}}
+\caption{\label{tab:school}Test for Factor Main Effects}\tabularnewline
+\toprule
+Model & Degree of Fredom & SSE & \(F^*\) & P-value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Model & Degree of Fredom & SSE & \(F^*\) & P-value\tabularnewline
+\midrule
+\endhead
+Full & 334 & 221371 & &\tabularnewline
+Reduced & 335 & 230604 & 13.931 & 0.0002228\tabularnewline
+\bottomrule
+\end{longtable}
+
+Since p-value = 0.0002228, we reject \(H_0\): \(\beta_1 = \beta_2 =...= \beta_{76} = 0\) at level of significance level 0.05. We conclude that there are school main effects.
+
+\hypertarget{analysis-of-class-size-effects-1}{%
+\subsection{Analysis of Class Size Effects}\label{analysis-of-class-size-effects-1}}
+
+\begin{figure}
+\centering
+\includegraphics{testing_files/figure-latex/tukey-1.pdf}
+\caption{\label{fig:tukey}Pairwise comparisons of factor level means}
+\end{figure}
+
+From Figure \ref{fig:tukey}, we could see that all the confidence intervals do no contain zero. So we conclude that, at family-wise level \(\alpha = 0,05\), \(\mu_{1.}\) and \(\mu_{2.}\), \(\mu_{2.}\) and \(\mu_{3.}\), \(\mu_{1.}\) and \(\mu_{3.}\) are different. Moreover, the small classes outperformed both regular classes and regular classes with aides.
+
+
+\end{document}
