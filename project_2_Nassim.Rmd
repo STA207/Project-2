@@ -22,8 +22,9 @@ knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
 ```{r}
 library("AER")
 library("foreign")
-library("car")
 library("MASS")
+library("kableExtra")
+
 ```
 
 
@@ -33,7 +34,7 @@ star = read.spss("STAR_Students.sav",to.data.frame = TRUE)
 
 
 
-View(star)
+
 
 
 
@@ -128,18 +129,18 @@ The STAR experiment was designed by a group of researchers including Helen Pate-
 
 # Discussion
 
-Model Diagnostics:
 
-Data Set:
 
-```{r}
+# Model Diagnostics
+
+
+```{r, include = FALSE}
+Teach_as_Unit <- read.csv("~/Desktop/STA 207/Project 2/Project 2 Github/Project-2/Teach_as_Unit.csv")
 t_data1 = Teach_as_Unit
 ```
 
-Model:
 
-```{r}
-str(t_data1)
+```{r, include = FALSE}
 
 t_data1$g1_schoolID = as.factor(t_data1$g1_schoolID)
 
@@ -153,84 +154,124 @@ med_anova = aov(g1_medmath ~ as.factor(g1_classtype) + as.factor(g1_schoolID),
 
 
 
-Model Diagnostics:
 
-Normality:
+# Normality:
 
-```{r}
+```{r, echo = FALSE, fig.align="center"}
 plot(med_anova, which = c(2))
 ```
 Figure 
 
-From the Q-Q plot of the residuals (Figure ..) , we can observe that most of that data points lie on a straight line, which is what we expect to see from a normal distribution. There are some points at the right tail which have a higher probability mass than expected; however, these points are only a few compared to the total amount of data. Thus, the normality assumption is satisfied from the Q-Q plot. 
+From the Q-Q plot of the residuals (Figure ..) , we can observe that most of that data points lie on a straight line, which is close to what we expect to see from a normal distribution. There are some points at the right tail which have a higher probability mass than expected; however, these points are only a few compared to the total amount of data. Thus, the normality assumption is largely satisfied from the Q-Q plot. 
 
 
-Histogram of Residuals:
-```{r}
+To visualize the distribution of the residuals, a histogram will be used:
+```{r, echo = FALSE, fig.align="center"}
 hist(reg1$residuals, main = "Histogram of Residuals", xlab = "Residual Values")
 ```
 
-From the histogram of the residuals, we can observe that the distribution of the residuals looks symmetric and bell-shaped, similar to what is seen from a normal distribution. 
+From the histogram of the residuals, we can observe that the distribution of the residuals looks symmetric about the mean and bell-shaped, similar to what is seen from a normal distribution. 
 
-To further test for normality of the errors, a Shapiro-Wilk test will be used. A Shapiro-Wilk test is used to test whether a distribution of data follows a normal distribution.
+To further test for normality of the errors, a Shapiro-Wilk test will be used on the distribution of the residuals. A Shapiro-Wilk test is used to test whether a distribution of data follows a normal distribution.
 
-Shapiro-Wilk Test for Normality:
+The null and alternative hypotheses are:
 H0: The residuals are normally distributed.
 H1: The residuals are not normally distributed.
-```{r}
-shapiro.test(reg1$residuals)
+
+
+```{r, echo = FALSE}
+
+W.statistic = round(as.numeric(names(table(shapiro.test(reg1$residuals)$statistic))), 2)
+P.value = round(shapiro.test(reg1$residuals)$p.value, 2)
+
+table = cbind(W.statistic, P.value)
+colnames(table) = c('W Statistic', 'P-Value')
+kable(table, caption = "Shapiro-Wilk Normality Test") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+
+
 ```
+
 
 The p-value of 0.13 is greater than the significance level of 0.05, and thus we fail to reject the null hypothesis. Thus, there is no evidence that the distribution of the residuals does not follow a normal distribution. 
 
 
-Equal Variances:
+
+
+# Equal Variances:
 
 Residual vs Fitted Plot:
 
-```{r}
+```{r, echo = FALSE, fig.align="center"}
 plot(med_anova, which = c(1))
 ```
+
 
 The residuals are pretty evenly spread out along the x-axis, and thus it seems that the equal variance assumption is satisfied.
 
 A Levene's test will be used to further test the equal variance assumption for both variables. 
 
-Levene's Test for Equality of Variances:
+The null and alternative hypotheses are:
 H0: The variances are equal across the various groups.
-H1: At least one of the groups has a different variance from the others.
+H1: Not all variances are equal across groups. 
 
-```{r}
-leveneTest(g1_medmath~g1_classtype, data = t_data1)
+
+```{r, echo = FALSE}
+a = leveneTest(g1_medmath~g1_classtype, data = t_data1)$Df[1]
+b = leveneTest(g1_medmath~g1_classtype, data = t_data1)$Df[2]
+c = paste(a, b, sep = ", ")
+d = round(leveneTest(g1_medmath~g1_classtype, data = t_data1)$F[1], 2)
+e = round(leveneTest(g1_medmath~g1_classtype, data = t_data1)$P[1], 2)
+
+table1 = cbind(c, d, e)
+colnames(table1) = c('df', 'F Value', 'Pr(>F)')
+kable(table1, caption = "Levene Test for Class Type Variable") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+
 ```
 
-```{r}
-leveneTest(g1_medmath~g1_schoolID, data = t_data1)
+
+```{r, echo = FALSE}
+a = leveneTest(g1_medmath~g1_schoolID, data = t_data1)$Df[1]
+b = leveneTest(g1_medmath~g1_schoolID, data = t_data1)$Df[2]
+c = paste(a, b, sep = ", ")
+d = round(leveneTest(g1_medmath~g1_schoolID, data = t_data1)$F[1], 2)
+e = round(leveneTest(g1_medmath~g1_schoolID, data = t_data1)$P[1], 2)
+
+table1 = cbind(c, d, e)
+colnames(table1) = c('df', 'F Value', 'Pr(>F)')
+kable(table1, caption = "Levene Test for School ID Variable") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
 ```
 
-In the Levene's test for both variables, both p-values are greater than the significance level of 0.05. Thus for each variable, the variances are not significantly different across treatment groups. Thus, the equal variance assumption is satisfied.  
+
+In the Levene's test for both variables, both p-values are greater than the significance level of 0.05. Thus for each variable, there is no evidence that not all of the variances are equal across treatment groups. Thus, the equal variance assumption is satisfied.  
 
 
 
 
 
 
-Independence:
+# Independence:
 
 This experiment is randomized in two ways and represents the best controlled environment to achieve independence of the results. First of all, teachers are randomly assigned to each class type: small, regular, and regular with aide. Second, every student is randomly assigned to each teacher. There is a possibility of the independence assumption not holding completely from the time of randomization to the time that the test scores were recorded. For instance, teachers may share materials, or parents may seek out tutoring for their child. However, given the randomized design of the experiment and the relatively large sample size, we may assume that the results are essentially independent. 
 
 
 
-Outliers:
+# Outliers:
 
 An outlier will be defined if it has a studentized residual value that is greater than 3 in absolute value.
 
-```{r}
-which(studres(reg1)>3 | studres(reg1)< -3)
-length(which(studres(reg1)>3 | studres(reg1)< -3))
+```{r, echo = FALSE}
+
+a = length(which(studres(reg1)>3 | studres(reg1)< -3))
+b = names(which(studres(reg1)>3 | studres(reg1)< -3))
+
+table2 = cbind(a, b)
+colnames(table2) = c('Number of Outliers', 'Observation Numbers')
+kable(table2, caption = "Outliers") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+
 ```
 
 There is only one outlier in the data, which is observation number 252. Thus, outliers do not pose a problem in our analysis.
+
 
 
 
