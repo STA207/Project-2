@@ -1,0 +1,29 @@
+---
+output: pdf_document
+---
+
+### Main Analysis
+
+For our analysis, we will construct the following factor effects model for the classroom median math score.
+
+$$Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ ijk},\ i = 1,...,a;\ j=1,...,b$$
+Where:
+
++ $a = 3,\ b = 76$, 
++ $\sum_{i=1}^{a} \tau_i = 0,\ \sum_{i=1}^{b} \beta_j = 0$
++ Distribution assumotion: $\epsilon_{ijk}$ are independently and identically distributed as $N(0,\sigma^2)$.
+
+and
+
+- $\mu_{..}$ represents the overall classroom median score across all treatment levels.
+- $\tau_i$ represents the effect of each class size on the overall median math score.
+- $\beta_j$ represents the effect of each school on the overall median math score.
+
+The sample size for the treatment consisting of the ith level for class size and the jth level of school will now be denoted by $n_{ij}$. And the total number of cases is $n_T = \sum_i\sum_jn_{ij}$. We estimate the population means by the corresponding sample means:
+
++ $Y_{i..}=\hat\mu_{i.}=\frac{\sum_j\bar{Y_{ij.}}}{b}$, where $\mu_{i.}=\mu_{..}+\tau_i$
++ $Y_{.j.}=\hat\mu_{.j}=\frac{\sum_i\bar{Y_{ij.}}}{a}$, where $\mu_{.j}=\mu_{..}+\beta_j$
+
+Our model is appropriate to answer the questions of interest because it captures the effect of each treatment on the class’ median performance while controlling for other external factors by blocking by school id.
+
+
