@@ -27,6 +27,9 @@ library("foreign")
 library("sqldf")
 library("plotly")
 library("kableExtra")
+library("ggplot2")
+library("dplyr")
+library("tidyverse")
 ```
 
 
@@ -217,29 +220,25 @@ plot(avg_anova)#normality is NOT an issue
 
 ## Background
 
-The Student/Teacher Achievement Ratio (STAR) was a four-year longitudinal class-size study funded by the Tennessee General Assembly and conducted by the State Department of Education. Over 7,000 students from kindergarten to 3rd grade in 79 schools were randomly assigned into one of three interventions: small class (13 to 17 students per teacher), regular class (22 to 25 students per teacher), and regular-with-aide class (22 to 25 students with a full-time teacher's aide). Classroom teachers were also randomly assigned to the classes they would teach. The interventions were initiated as the students entered school in kindergarten and continued through third grade.     
+The Student/Teacher Achievement Ratio (STAR) was a four-year longitudinal class-size study funded by the Tennessee General Assembly and conducted by the State Department of Education. Over 7,000 students from kindergarten to 3rd grade in 79 schools were randomly assigned into one of three interventions: small class (13 to 17 students per teacher), regular class (22 to 25 students per teacher), and regular-with-aide class (22 to 25 students with a full-time teacher's aide). The interventions were initiated as the students entered school in kindergarten and continued through third grade.     
 
-Some of the key features of project STAR are:    
-1. *All Tennessee schools with K-3 classes were invited to participate.* Giving every school a chance to join the study helped ensure a diverse sample as well as rule out the possibility that class-size effects could be attributed to selection bias.   
+Besides following standard procedures that ensured confidentiality and ethics in human subjects' research, Project STAR also highlights the important features of:    
 
-2. *Each school included in the study had to have a large enough student body to form as least one of each of the three class types.* The within-school design provided built-in control for differences among schools in terms of resources, leadership, and facilities.   
+1. *Each school included in the study had to have a large enough student body to form as least one of each of the three class types.*  
 
-3. *Schools from inner-city, urban, suburban and rural locations were included in the experiment.* This feature guaranteed that samples would include children from various ethnic backgrounds and income levels.   
+2. *Students and teachers were randomly assigned to their class type.*    
 
-4. *Students and teachers were randomly assigned to their class type.*    
+Project STAR is an example of **stratified randomized design**, where experimental units are grouped together according to certain pre-treatment characteristics into strata. Within each stratum, a completely randomized experiment is conducted. In the case that there exist population structures that associate or covary with the experimental outcome, stratified randomized experiments generally are more informative than completely randomized experiments (Suresh K., 2011). The goal of a stratified study is usually not to identify treatment effects within a single stratum, but rather treatment effects across all strata.
 
-5. *Investigators followed the standard procedures for confidentiality in human subjects' research.*   
+Because it is reasonable to expect systemic differences in educational outcome across schools, due to reasons such as demographics, school could be a confounding variable and influence the ooutcome of the Project STAR research. Therefore, each school should be viewed as a stratum in analyzing Project STAR data.   
 
-6. *No children were to receive fewer services than normal because of the experiment.*    
-
-7. *Student achievement was to be tracked by standarized tests, which were carefully monitored.*   
-
+To expand on previous findings, teachers, rather than individual student, will be used as experimental units. The adjustment of experimental unit will facilitate the making of a causal statement as to the effect of class size on educational outcome, because the teacher experimental units more convincingly satisfy the stable unit treatment value assumption (SUTVA) and independence assumptions necessary for causal inferences. The detail of these assumtions will be dissected in the discussion section. 
 
 ## Questions of Interest
 
 Our questions of interest are as follows:     
 
-1. Is there a significant difference in a first-grade teacher's average math scores across the three different class sizes?    
+1. Is there a significant difference in a first-grade teacher's teaching performance in math across the three different class sizes?    
 2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?    
 3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied?    
 4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?      
@@ -248,15 +247,37 @@ Our questions of interest are as follows:
 
 ## Population and study design
 
-Project STAR is an example of stratified randomized design, where experimental units are grouped together according to certain pre-treatment characteristics into strata. Within each stratum, a completely randomized experiment is conducted. In this study, each school can be viewed as a stratum. A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
+A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
 
-To expand on our previous findings, we will set teachers as the experimental unit, rather than the individual student. We will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. The adjustment of experimental unit will enable us to make a causal statement as to the effect of class size on educational outcome.   
+In oreder to treat teachers as the experimental units, we will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. 
 
 ## Statistical Analysis
 
 ### Descriptive Analysis
 
+We will check 
+- Completedness and balancedness of each stratum; 
+- Variation of response variable, scaled 1st grade math score, across class types; 
+- Variation of response variable across strata;
+
+
+Figure .. completedness of strata
+
+```{r}
+t_data1_tally = t_data1 %>%
+  group_by(g1_schoolID, g1_classtype) %>%
+  tally()
+ggplot(t_data1_tally, aes(x = g1_schoolID, y = n, fill = g1_classtype)) +
+  geom_col()
+```
+
+
 > Task 1: Explore math scaled scores in the 1st with teachers as the unit. Generate summary statistics (in forms of tables or plots) that you find informative, and explain them.    
+
+```{r}
+t_data1
+```
+
 
 ### Main Analysis
 
@@ -333,4 +354,6 @@ This assumption is met in the experiment by using double randomization: One rand
 Therefore, our analysis concludes that smaller class size has a positive average causal effect on a teacher's teaching outcome in math. 
 This is different from the conclusion of Project I. SUTVA was not plausible when using individual students as experimental units. Interactions between students likely resulted in altered potential outcome of one student due to the treatment assigned to another, thus violating SUTVA. In that case, rejections of the null hypothesis would not necessarily be convincing evidence of effects of class size; it may simply indicate the presence of peer effects. In contrast, using teachers as experimental units does not rely on no-interference assumptions among students. This makes the results reported here credible evidence of causal class-size effects.
 
+# Reference
+Suresh K. (2011). An overview of randomization techniques: An unbiased assessment of outcome in clinical research. Journal of human reproductive sciences, 4(1), 8–11. doi:10.4103/0974-1208.82352    
 
