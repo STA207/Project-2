@@ -2,9 +2,6 @@
 output:
   bookdown::pdf_document2:
     toc: False
-    df_print: paged
-    fig_caption: yes
-    number_sections: yes
 ---
 
 <style type="text/css">
@@ -173,7 +170,7 @@ Reduced|335|230604|13.931|0.0002228
 Since p-value = 0.0002228, we reject $H_0$: $\beta_1 = \beta_2 =...= \beta_{76} = 0$ at level of significance level 0.05. We conclude that there are school main effects.
 
 ## Analysis of Class Size Effects
-```{r tukey, fig.cap = "Pairwise comparisons of factor level means"}
+```{r}
 library(stats)
 library(tidyverse)
 t_data2 = t_data1 %>% 
@@ -185,8 +182,19 @@ t_data2 = t_data1 %>%
   rename(Class_Size = g1_classtype)
  
 fit = aov(g1_medmath ~ g1_schoolID + Class_Size, data = t_data2)
-t_ci = TukeyHSD(fit, 'Class_Size')
-plot(t_ci)
+t_ci = TukeyHSD(fit, 'Class_Size', ordered = TRUE)
 ```
 
-From Figure \@ref(fig:tukey), we could see that all the confidence intervals do no contain zero. So we conclude that, at family-wise level $\alpha = 0,05$, $\mu_{1.}$ and $\mu_{2.}$, $\mu_{2.}$ and $\mu_{3.}$, $\mu_{1.}$ and $\mu_{3.}$ are different. Moreover, the small classes outperformed both regular classes and regular classes with aides.
+From Table \@ref(tab:tukey), we could see that all the confidence intervals do no contain zero. So we conclude that, at family-wise level $\alpha = 0,05$, $\mu_{1.}$ and $\mu_{2.}$, $\mu_{2.}$ and $\mu_{3.}$, $\mu_{1.}$ and $\mu_{3.}$ are different. Moreover, the small classes outperformed both regular classes and regular classes with aides.
+
+
+```{r tukey}
+rownames(t_ci$Class_Size) = c("$D_{12}$", "$D_{32}$","$D_{31}$")
+knitr::kable(round(t_ci$Class_Size,3), 
+             col.names = c("$\\hat D_{ii'}$", "Lower bound", "Upper bound", "p-value"),
+             format = "pandoc",
+             caption = "Pairwise comparisons of factor level means"
+             ) 
+#plot(t_ci)
+```
+
