@@ -36,9 +36,6 @@ data1 = data1[complete.cases(data1),]
 ```
 
 
-
-
-
 ```{r, include = FALSE}
 #Group by teachers as unit
 t_data1 = sqldf("SELECT DISTINCT(g1tchid) as g1_teachID,
@@ -205,9 +202,9 @@ plot(avg_anova)#normality is NOT an issue
 
 ***
 
-# Introduction
+## 1.0 Introduction
 
-## Background
+#### 1.1 Background
 
 The Student/Teacher Achievement Ratio (STAR) was a four-year longitudinal class-size study funded by the Tennessee General Assembly and conducted by the State Department of Education. Over 7,000 students from kindergarten to 3rd grade in 79 schools were randomly assigned into one of three interventions: small class (13 to 17 students per teacher), regular class (22 to 25 students per teacher), and regular-with-aide class (22 to 25 students with a full-time teacher's aide). The interventions were initiated as the students entered school in kindergarten and continued through third grade.     
 
@@ -223,24 +220,24 @@ Because it is reasonable to expect systemic differences in educational outcome a
 
 To expand on previous findings, teachers, rather than individual student, will be used as experimental units. The adjustment of experimental unit will facilitate the making of a causal statement as to the effect of class size on educational outcome, because the teacher experimental units more convincingly satisfy the stable unit treatment value assumption (SUTVA) and independence assumptions necessary for causal inferences. The detail of these assumtions will be dissected in the discussion section. 
 
-## Questions of Interest
+#### 1.2 Questions of Interest
 
 1. Is there a significant difference in a first-grade teacher's teaching performance in math across the three different class sizes?    
 2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?    
 3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied?    
 4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?         
 
-# Analysis Plan
+## 2.0 Analysis Plan
 
-## Population and study design
+#### 2.1 Population and study design
 
 A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. Our model is appropriate to answer the questions of interest because it captures the effect of each treatment on the class’ median math performance while controlling for other external factors by blocking by school id.    
 
 In order to treat teachers as the experimental units, we will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. 
 
-## Statistical Analysis   
+#### 2.2 Statistical Analysis   
 
-### Descriptive Analysis   
+##### 2.2.1 Descriptive Analysis   
 
 We will examine the following aspects to characterize the independent and response variables:     
 
@@ -248,7 +245,7 @@ We will examine the following aspects to characterize the independent and respon
 - Distribution of response variable, median scaled 1st grade math score, across schools (strata);    
 - Distribution of response variable across class sizes;    
 
-#### 2.2.2 Main Analysis
+##### 2.2.2 Main Analysis
 
 For our main analysis, we will construct the following factor effects model for the classroom median math score.
 
@@ -266,9 +263,9 @@ Our model is appropriate to answer the questions of interest because it captures
 
 From the model equation above, you can see that we are not considering the interaction effect between class type and school id.  We made this decision for two reasons. First, the inclusion of an interaction term would increase the number of parameters which need estimation from 79 to a number which exceeds our sample size. This would impede us from fitting a proper model and is our first rationale for omitting this term in our analysis. Our second reason is that of relevance. The purpose of our analysis is to examine the main effects of class size on the median scaled math score achieved by a first-grade teacher’s class. We want out conclusions to be applicable to the most general a population possible. If we include an interaction term, our model now describes the effect of class sizes within each individual school & teacher combination. For the combination of these two arguments, we will omit the interaction parameter between class size and school id from our model. 
 
-#### Hypothesis Testing
+##### 2.2.3 Hypothesis Testing
 
-Since we have unequal sample sizes, the factor effect component sum of squares are no longer orthogonal. Therefore, we would use the general linear F-test instead for the testing parts. The basic idea is to compare SSE under the full model with SSE under the reduced model, and we want to test whether specific components could be drop out of the full model. The details are shown as below:
+Due to unbalanced design, the factor effect component sum of squares are no longer orthogonal. Therefore, we would use the general linear F-test for the testing parts. The basic idea is to compare SSE under the full model with SSE under the reduced model, and we want to test whether specific components could be drop out of the full model. The details are shown as below:
 
 (@) Here the F-test statistic is: $F^* = \frac{\frac{SSE(R)-SSE(F)}{df_R-df_F}}{\frac{SSE(F)}{df_F}}$, where SSE(R) is SSE under the reduced model, $df_R$ is the degree of freedom for the reduced model, SSE(F) is SSE under the full model, and $df_F$ is the degree of freedom for the full model.
 
@@ -276,23 +273,7 @@ Since we have unequal sample sizes, the factor effect component sum of squares a
 
 (@) We would reject $H_0$ at level $\alpha$ if $F^* > F(1-\alpha;(df_R-df_F),df_F)$, or if the p-value $< \alpha$.
 
-##### Test for Interaction Effects
-
-First, we want to test whether or not interaction effects are present. This would assess whether the effect of the factor class size differs across the stratum.
-
-$H_0: all \ (\tau\beta)_{ij} = 0$
-
-$H_a$: not all $(\tau\beta)_{ij}'s$ equal zero
-
-Here the full model is: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + (\tau\beta)_{ij} + \epsilon_{ijk}$.
-
-And the reduced model is: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}$.
-
-If we reject $H_0$ at level $\alpha$, we conclude that there are interaction effects.  
-
-##### Test for Factor Main Effects
-
-###### Class Size 
+###### 2.2.3.1.1 Class Size Effects
 
 Then, we want to test whether or not class size effects are present:
 
@@ -300,45 +281,15 @@ $H_0$: $\tau_1 = \tau_2 = \tau_3 = 0$
 
 $H_a$: not all $\tau_i's$ equal zero.
 
-(1) If there are interaction effects, then
++ Full model: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}$.
 
-+ The full model is: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + (\tau\beta)_{ij} +\epsilon_{ijk}$.
-
-+ And the reduced model is: $Y_{ijk} = \mu_{..} + \beta_j + (\tau\beta)_{ij} +\epsilon_{ijk}$.
-
-(2) If there are no interaction effects, then
-
-+ The full model is: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}$.
-
-+ And the reduced model is: $Y_{ijk} = \mu_{..} + \beta_j + \epsilon_{ijk}$.
++ Reduced model is: $Y_{ijk} = \mu_{..} + \beta_j + \epsilon_{ijk}$.
 
 If we reject $H_0$ at level $\alpha$, we conclude that the effects of class size are present.  
 
-###### School
+###### 2.2.3.1.2 Pairwise Class Size Effects
 
-Although the class size effects are of our primary interests, we also want to test whether or not school effects are present:
-
-$H_0$: $\beta_1 = \beta_2 =...= \beta_{76} = 0$
-
-$H_a$: not all $\beta_i's$ equal zero.
-
-(1) If there are interaction effects, then
-
-+ The full model is: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + (\tau\beta)_{ij} +\epsilon_{ijk}$.
-
-+ And the reduced model is: $Y_{ijk} = \mu_{..} + \tau_i + (\tau\beta)_{ij} +\epsilon_{ijk}$.
-
-(2) If there are no interaction effects, then
-
-+ The full model is: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}$.
-
-+ And the reduced model is: $Y_{ijk} = \mu_{..} + \tau_i + \epsilon_{ijk}$.
-
-If we reject $H_0$ at level $\alpha$, we conclude the effects of school are present. 
-
-###### Analysis of Class Size Effects
-
-Because we are interested in the difference in the class size effects, we would do pairwise comparisons among the three class sizes. The Tukey's procedure will be used, and this procedure is conservative result when sample sizes are unequal.
+We will do pairwise comparisons among the three class sizes. The Tukey's procedure will be used, and this procedure yields conservative result when sample sizes are unequal.
 
 First, we define the differnce between two factor level means $D_{ii'} = \mu_{i.} - \mu_{i'.}$. The point estimate for $D_{ii'}$ is $\hat D_{ii'} = \bar{Y_{i..}}-\bar{Y_{i'..}}$. Since $\bar {Y_{i..}}$ and $\bar {Y_{i'..}}$ are independent, the variance of $\hat D_{ii'}$ is $\sigma^2\{\hat D_{ii'}\}=\frac{\sigma^2}{b^2}\sum_j(\frac{1}{n_{ij}}+\frac{1}{n_{i'j}})$. And the estimated variance of $\hat D_{ii'}$ is $s^2\{\hat D_{ii'}\}=\frac{MSE}{b^2}\sum_j(\frac{1}{n_{ij}}+\frac{1}{n_{i'j}})$.
 
@@ -355,9 +306,23 @@ where $T=\frac{1}{\sqrt{2}}q(1-\alpha;a,n_T-ab)$
 
 We would check whether or not zero is contained in each interval. If zero is contained, we conclude $H_0$; otherwise, we conclude $H_a$.
 
+###### 2.2.3.2 School Effects
+
+Although the class size effects are of our primary interests, we also want to test whether or not school effects are present:
+
+$H_0$: $\beta_1 = \beta_2 =...= \beta_{76} = 0$
+
+$H_a$: not all $\beta_i's$ equal zero.
+
++ Full model: $Y_{ijk} = \mu_{..} + \tau_i + \beta_j + \epsilon_{ijk}$.
+
++ Reduced model is: $Y_{ijk} = \mu_{..} + \tau_i + \epsilon_{ijk}$.
+
+If we reject $H_0$ at level $\alpha$, we conclude the effects of school are present. 
+
 ### Model Diagnostics
 
-We will use Q-Q plot, histogram and the Shapiro-Wilk test inspect the normality of residuals. A scatter plot and a fitted-value-versus-residual scatter plot and the Levene test will be used to examine equality of residual variance. Independence of residual and outlying data points will also be discussed.  
+We will use Q-Q plot, histogram and the Shapiro-Wilk test inspect the normality of residuals. A scatter plot and a fitted-value-versus-residual scatter plot and the Levene test will be used to examine equality of residual variance. Independence of residuals and outlying data points will also be discussed.  
 
 # Results
 
@@ -512,7 +477,7 @@ This experiment is randomized in two ways and represents the best controlled env
 
 ### Outliers:
 
-An outlier will be defined if it has a studentized residual value that is greater than 3 in absolute value.
+An outlier will be defined if it has a studentized residual value that is greater than 3 in absolute value. Entry 252, (teach ID 24475510, school ID 244755, small class size) was determined as an outlier (z = 3.13). Upon closer inspection of the entry, we did not find sufficient evidence to exclude it from the analysis. 
 
 > undefined variables here
 
