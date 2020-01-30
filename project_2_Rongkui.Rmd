@@ -3,19 +3,8 @@ title: "Effects of Class Size on Math Performance in Tennessee"
 output:
   html_document:
     df_print: paged
-  pdf_document:
-    df_print: paged
-    fig_caption: yes
-    number_sections: yes
+  word_document: default
 ---
-
-<style type="text/css">
-
-body{ /* Normal  */
-      font-size: 18px;
-  }
-
-</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
@@ -217,7 +206,6 @@ plot(avg_anova)#normality is NOT an issue
 
 # Introduction
 
-
 ## Background
 
 The Student/Teacher Achievement Ratio (STAR) was a four-year longitudinal class-size study funded by the Tennessee General Assembly and conducted by the State Department of Education. Over 7,000 students from kindergarten to 3rd grade in 79 schools were randomly assigned into one of three interventions: small class (13 to 17 students per teacher), regular class (22 to 25 students per teacher), and regular-with-aide class (22 to 25 students with a full-time teacher's aide). The interventions were initiated as the students entered school in kindergarten and continued through third grade.     
@@ -236,48 +224,28 @@ To expand on previous findings, teachers, rather than individual student, will b
 
 ## Questions of Interest
 
-Our questions of interest are as follows:     
-
 1. Is there a significant difference in a first-grade teacher's teaching performance in math across the three different class sizes?    
 2. Are teacher's performances relatively stable between different schools? That is, does the school itself affect class average math scores?    
 3. Does our ANOVA model fit well with the data? In other words, are the analysis of variance assumptions satisfied?    
-4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?      
+4. Can we draw causal conclusion that class sizes affect the class average math scores of first-grade teachers?         
 
 # Analysis Plan
 
 ## Population and study design
 
-A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. 
+A two-way ANOVA test is fitting for answering our questions of interest under the stratified randomized design. One factor in the ANOVA model will be class size, whose main effect is of primary interest in this study. The other factor will be school ID, in order to control for and observe the stratum effect. Our model is appropriate to answer the questions of interest because it captures the effect of each treatment on the class’ median math performance while controlling for other external factors by blocking by school id.    
 
 In oreder to treat teachers as the experimental units, we will use the *median* scaled 1st grade math score of all students under each teacher for our analysis. The median score of a class truthfully reflects the class' performance. In additon, the median is usually a more robust summary statistic than the mean, because it is less affected by outliers. 
 
-## Statistical Analysis
+## Statistical Analysis   
 
-### Descriptive Analysis
+### Descriptive Analysis   
 
-We will check 
-- Completedness and balancedness of each stratum; 
-- Variation of response variable, scaled 1st grade math score, across class types; 
-- Variation of response variable across strata;
+We will examine the following aspects to characterize the independent and response variables:     
 
-
-Figure .. completedness of strata
-
-```{r}
-t_data1_tally = t_data1 %>%
-  group_by(g1_schoolID, g1_classtype) %>%
-  tally()
-ggplot(t_data1_tally, aes(x = g1_schoolID, y = n, fill = g1_classtype)) +
-  geom_col()
-```
-
-
-> Task 1: Explore math scaled scores in the 1st with teachers as the unit. Generate summary statistics (in forms of tables or plots) that you find informative, and explain them.    
-
-```{r}
-t_data1
-```
-
+- Completedness and balancedness of the strata; 
+- Distribution of response variable, median scaled 1st grade math score, across schools (strata);    
+- Distribution of response variable across class sizes;    
 
 ### Main Analysis
 
@@ -285,33 +253,58 @@ For our analysis, we will construct the following factor effects model for the c
 
 $$y_{ijk} = μ_{..} + τ_i + β_j + (τβ)_{ij} + ε_{ ijk}$$
 for:
-$$i  \epsilon[1,2,3,4]$$
-$$j  \epsilon[1,2,...,76]$$
+$$i  \in [1,2,3,4]$$
+$$j  \in [1,2,...,76]$$
 Where:
 
 $$\sum_{i=1}^{4} τ_i = 0$$
 $$\sum_{i=1}^{76} β_j = 0$$
-and 
 - $μ_{..}$ represents the overall classroom median score across all treatment levels.   
 - $τ_i$ represents the effect of each class size on the overall median math score.   
 - $β_j$ represents the effect of each school on the overall median math score.    
 - $(τβ)_{ij}$ represents the interaction effect, if any, of each school & class size combination on the overall median math score.    
 
-Our model is appropriate to answer the questions of interest because it captures the effect of each treatment on the class’ median performance while controlling for other external factors by blocking by school id.
+> I really think we should talk about the alternative, no-interaction model here. 
 
-Figure #, which shows the boxplots of the classroom median scores for each school, highlights the variability in teacher performance across each distinct school. This variability is likely due to the similar demographic features within schools, but various demographic features between them. For example, schools located in areas of high affluence may achieve better classroom performance since more students have access to academic support in addition to greater parent oversight. Similarly, schools who pull their students from less affluent areas may see worse classroom performance due to student food insecurity, lack of academic support, and other social deficiencies. 
+### Model Diagnostics
+
+We will use Q-Q plot, histogram and the Shapiro-Wilk test inspect the normality of residuals. A scatter plot and a fitted-value-versus-residual scatter plot and the Levene test will be used to examine equality of residual variance. Independence of residual and outlying data points will also be discussed.  
+
+# Results
+
+## Descriptive Analysis     
+
+After filtering out entries with missing datapoints in variables relevant to 1st grade performance, our dataset included median scaled 1st grade math scores from 338 teachers from 76 schools. Seventy-two out of 76 schools had least one complete set of the three different class sizes (Figure 1a). The four schools with incomplete treatment sets all had both regular classes and small classes. Due to the small number of incomplete strata and the presence of more than one treatments within them, we decided to retain these schools in the analysis (Kutner et al., 2005, p.966). Figure 1b, the boxplots of the classroom median scaled math scores for each school, highlights the high variability in teacher performance across distinct schools. The distribution of classroom median scaled math scores differs across class sizes (Figure 1c), with large within-group variance that causes the distributions to overlap with one another.  
+
+```{r, echo=FALSE}
+t_data1_tally = t_data1 %>%
+  group_by(g1_schoolID, g1_classtype) %>%
+  tally()
+
+class_type_labels = c("REGULAR + AIDE CLASSES", "REGULAR CLASSES", "SMALL CLASSES")
+ggplot(t_data1_tally, aes(x = g1_schoolID, y = n, fill = g1_classtype, color = g1_classtype)) +
+  geom_col() +
+  facet_grid(g1_classtype ~.) + 
+  theme(axis.text.x = element_blank()) +
+  ggtitle(label = "Class count") +
+  theme(plot.title = element_text(hjust = 0.5), strip.text.y = element_text(size = 6)) +
+  guides(fill=guide_legend(title=""), color = guide_legend(title="")) + 
+  scale_fill_manual(values = c("#b2e0d2", "#fdc6b0", "#c6cfe5")) +
+  scale_color_manual(values = c("#66c2a5", "#fc8d62", "#8da0cb")) +
+  xlab("School ID") +
+  ylab("Class count")
+
+```
 
 ```{r, echo=FALSE}
 box5
 ```
 
-Because of this high variability in median classroom performance between schools, blocking by school id in our model helps to extract the true effect of the class size treatment on the classroom median performance. 
+```{r, echo=FALSE}
+box4
+```
 
-### Sensitivity Analysis
-
-# Results
-
-## Descriptive Analysis
+Figure 1. (a). Results of proposed descriptive analysis show completedness of strata. (b, c) Differences in median scaled 1st grade math score across schools and class types. 
 
 ## Main Analysis
 
@@ -330,16 +323,140 @@ med_anova1_int$`Pr(>F)` = c("<.001", "<.001",.39, "NA")
 kable(med_anova1_int, caption  = "ANOVA Table with Interaction") %>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
-> Task 5: Conduct model diagnostic and/or sensitivity analysis.
+## Model Diagnostics
+
+```{r, include = FALSE}
+
+t_data1$g1_schoolID = as.factor(t_data1$g1_schoolID)
+
+reg1 = lm(g1_medmath ~ g1_classtype + g1_schoolID, 
+                  data = t_data1)
+
+med_anova = aov(g1_medmath ~ as.factor(g1_classtype) + as.factor(g1_schoolID), 
+                  data = t_data1)
+
+```
+
+
+
+```{r, echo = FALSE, fig.align="center"}
+plot(med_anova, which = c(2))
+```
+
+```{r, echo = FALSE, fig.align="center"}
+hist(reg1$residuals, main = "Histogram of Residuals", xlab = "Residual Values")
+```
+
+
+```{r, echo = FALSE, fig.align="center"}
+plot(med_anova, which = c(1))
+```
+
+Figure 2: Visual diagnostics of ANOVA model assumptions. (a). Normal Q-Q plot of residuals. (b) Histogram of model residuels. (c) Residual-versus-fitted value scatter plot. 
+
+### Normality:   
+
+From the Q-Q plot of the residuals (Figure 2a) , we can observe that most of that data points lie on a straight line, which is close to what we expect to see from a normal distribution. There are some points at the right tail which have a higher probability mass than expected; however, these points are only a few compared to the total amount of data. Thus, the normality assumption is largely satisfied from the Q-Q plot. A histogram is used to visualize the distribution of the residuals (Figure 2b). From the histogram we can observe that the distribution of the residuals looks symmetric about the mean and bell-shaped, similar to what is seen from a normal distribution. 
+
+To further test for normality of the errors, a Shapiro-Wilk test will be used on the distribution of the residuals. A Shapiro-Wilk test is used to test whether a distribution of data follows a normal distribution.
+
+The null and alternative hypotheses of the Shapiro-Wilk test are:   
+$H_0$: The residuals are normally distributed.   
+$H_1$: The residuals are not normally distributed.   
+
+
+```{r, echo = FALSE}
+
+W.statistic = round(as.numeric(names(table(shapiro.test(reg1$residuals)$statistic))), 2)
+P.value = round(shapiro.test(reg1$residuals)$p.value, 2)
+
+table = cbind(W.statistic, P.value)
+colnames(table) = c('W Statistic', 'P-Value')
+kable(table, caption = "Shapiro-Wilk Normality Test") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+
+
+```
+
+The p-value of 0.13 is greater than the significance level of 0.05, and thus we fail to reject the null hypothesis. Thus, there is no evidence that the distribution of the residuals does not follow a normal distribution. 
+
+### Equal Variances:   
+
+The residuals are evenly spread out along the y-axis in a residual-versus-fitted value scatter plot (Figure 2c). Visually, the equal variance assumption is satisfied.    
+
+A Levene's test is used to further test the equal variance assumption for both independent variables.    
+
+The null and alternative hypotheses of the Levene's test are:   
+$H_0$: The residual variances are equal across groups.   
+$H_1$: Not all residual variances are equal across groups.   
+
+
+```{r, echo = FALSE}
+a = leveneTest(g1_medmath~g1_classtype, data = t_data1)$Df[1]
+b = leveneTest(g1_medmath~g1_classtype, data = t_data1)$Df[2]
+c = paste(a, b, sep = ", ")
+d = round(leveneTest(g1_medmath~g1_classtype, data = t_data1)$F[1], 2)
+e = round(leveneTest(g1_medmath~g1_classtype, data = t_data1)$P[1], 2)
+
+table1 = cbind(c, d, e)
+colnames(table1) = c('df', 'F Value', 'Pr(>F)')
+kable(table1, caption = "Levene Test for Class Type Variable") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+
+```
+
+```{r, echo = FALSE}
+a = leveneTest(g1_medmath~g1_schoolID, data = t_data1)$Df[1]
+b = leveneTest(g1_medmath~g1_schoolID, data = t_data1)$Df[2]
+c = paste(a, b, sep = ", ")
+d = round(leveneTest(g1_medmath~g1_schoolID, data = t_data1)$F[1], 2)
+e = round(leveneTest(g1_medmath~g1_schoolID, data = t_data1)$P[1], 2)
+
+table1 = cbind(c, d, e)
+colnames(table1) = c('df', 'F Value', 'Pr(>F)')
+kable(table1, caption = "Levene Test for School ID Variable") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+```
+
+In the Levene's test for both independent variables, both p-values are greater than the significance level of 0.05. Thus for each variable, there is no evidence that residual variances are not equal across treatment groups. Thus, the equal variance assumption is satisfied.  
+
+### Independence:
+
+This experiment is randomized in two ways and represents the best controlled environment to achieve independence of the results. First of all, teachers are randomly assigned to each class type: small, regular, and regular with aide. Second, every student is randomly assigned to each teacher. There is a possibility of the independence assumption not holding completely from the time of randomization to the time that the test scores were recorded. For instance, teachers may share materials, or parents of the same class may together decide to seek out tutoring for their children. However, given the randomized design of the experiment and the relatively large sample size, we may assume that the results are essentially independent. 
+
+### Outliers:
+
+An outlier will be defined if it has a studentized residual value that is greater than 3 in absolute value.
+
+> undefined variables here
+
+```{r, eval = FALSE}
+a = length(which(studres(reg1)>3 | studres(reg1)< -3))
+b = names(which(studres(reg1)>3 | studres(reg1)< -3))
+
+table2 = cbind(a, b)
+colnames(table2) = c('Number of Outliers', 'Observation Numbers')
+kable(table2, caption = "Outliers") %>% kable_styling(bootstrap_options = c("striped", "bordered"), full_width = F)
+
+```
+
+There is only one outlier in the data, which is observation number 252. Thus, outliers do not pose a problem in our analysis.
+
+## Tests
 
 > Task 6: Test whether there is a difference in math scaled score in 1st grade across teachers in different class types. Justify your choice of test.
 
-## Sensitivity analysis
-
 # Discussion
 
-In this report, we presented our usage of 2-way ANOVA to analyze the effect of class size on first-grade teachers' teaching performance in math in a stratified randomized experiment, using each school as a stratum. We explored the effect of including schoo-by-class size interactions in our model, and concluded that interactions between the two factors did not contribute significantly to the variance partitioning of the data. Model diagnostics suggested that the dataset satisfied assumptions for ANOVA. Results derived from the fitting of the model suggested significant difference in a first-grade teacher's median math scores across different class sizes. Pairwise comparisons suggested that **small classes and regular classes with aides both outperformed regular classes without aides**. The model also revealed significant performance differences across schools, with the largest pairwaise difference being **XXX** in class median 1st grade scale math score.      
+In this report, we presented our usage of 2-way ANOVA to analyze the effect of class size on first-grade teachers' teaching performance in math in a stratified randomized experiment, using each school as a stratum.    
 
+#### Stratified Randomized Design
+Exploratory analysis highlights the variability in teacher performance across distinct schools. This variability is likely due to the similar demographic features within schools, but various demographic features between them. For example, schools located in areas of high affluence may achieve better classroom performance since more students have access to academic support in addition to greater parent oversight. Similarly, schools who pull their students from less affluent areas may see worse classroom performance due to student food insecurity, lack of academic support, and other social deficiencies. Because of this high variability in median classroom performance between schools, blocking by school ID in our model helps to extract the precise effect of the class size treatment on the classroom median performance.    
+
+#### Exclusion of Interaction Terms   
+We explored the effect of including schoo-by-class size interactions in our model, and concluded that interactions between the two factors did not contribute significantly to the variance partitioning of the data. A model without interaction was used in all following analyses. Philosophically, excluding interaction terms from the model also fits the purpose of a stratified randomized experiment, because we are not primarily interested in the class size effect within individual schools, but rather its main effect across all schools. Eliminating interaction terms results in fewer parameters to estimate and hence higher power of the test.       
+
+#### Main Effect
+Model diagnostics suggested that the dataset satisfied assumptions for ANOVA. Results derived from the fitting of the model suggested significant difference in a first-grade teacher's median math scores across different class sizes. Pairwise comparisons suggested that **small classes and regular classes with aides both outperformed regular classes without aides**. The model also revealed significant performance differences across schools, with the largest pairwaise difference being **XXX** in class median 1st grade scale math score.      
+
+#### Causal Inference  
 This analysis enables us to make causal statements regarding the effect of class size on teacher's performance in math education. This is made possible by using teachers as experimental units, thus satisfying the SUTVA and independence assumptions necessary for causal inferences:    
 
 **SUTVA**:
@@ -355,5 +472,6 @@ Therefore, our analysis concludes that smaller class size has a positive average
 This is different from the conclusion of Project I. SUTVA was not plausible when using individual students as experimental units. Interactions between students likely resulted in altered potential outcome of one student due to the treatment assigned to another, thus violating SUTVA. In that case, rejections of the null hypothesis would not necessarily be convincing evidence of effects of class size; it may simply indicate the presence of peer effects. In contrast, using teachers as experimental units does not rely on no-interference assumptions among students. This makes the results reported here credible evidence of causal class-size effects.
 
 # Reference
+Kutner, M. H., Nachtsheim, C. J., Neter, J., & Li, W. (2005). Applied linear statistical models. New York: McGrawHill Education.     
 Suresh K. (2011). An overview of randomization techniques: An unbiased assessment of outcome in clinical research. Journal of human reproductive sciences, 4(1), 8–11. doi:10.4103/0974-1208.82352    
 
