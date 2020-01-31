@@ -241,6 +241,7 @@ Figure #, which shows the boxplots of the classroom median scores for each schoo
 
 ```{r, echo=FALSE}
 box5
+
 ```
 
 Because of this high variability in median classroom performance between schools, blocking by school ID in our model helps to extract the true effect of the class size treatment on the classroom median math performance. 
@@ -274,6 +275,7 @@ reg1 = lm(g1_medmath ~ g1_classtype + g1_schoolID,
 med_anova1 = round(med_anova1, 2)
 med_anova1$`Pr(>F)` = c("<.001", "<.001", "NA")
 
+table(med_anova1)
 
 kable(med_anova1, caption  = "Model ANOVA Table") %>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
